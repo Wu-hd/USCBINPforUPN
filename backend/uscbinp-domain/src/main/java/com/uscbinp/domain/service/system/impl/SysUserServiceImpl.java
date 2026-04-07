@@ -5,6 +5,7 @@ import com.uscbinp.common.exception.BusinessException;
 import com.uscbinp.domain.service.system.SysRoleService;
 import com.uscbinp.domain.service.system.SysUserService;
 import com.uscbinp.domain.service.system.SystemModelLock;
+import com.uscbinp.domain.service.system.permission.DataPermissionEvaluator;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -23,35 +24,45 @@ public class SysUserServiceImpl implements SysUserService {
 
     private final SysRoleService sysRoleService;
     private final SystemModelLock systemModelLock;
+    private final DataPermissionEvaluator dataPermissionEvaluator;
     private final Map<Long, UserState> users = new ConcurrentHashMap<>();
     private final Map<Long, List<Long>> userRoleBindings = new ConcurrentHashMap<>();
     private final AtomicLong userIdSequence = new AtomicLong(100L);
 
-    public SysUserServiceImpl(SysRoleService sysRoleService, SystemModelLock systemModelLock) {
+    public SysUserServiceImpl(SysRoleService sysRoleService,
+                              SystemModelLock systemModelLock,
+                              DataPermissionEvaluator dataPermissionEvaluator) {
         this.sysRoleService = sysRoleService;
         this.systemModelLock = systemModelLock;
-        users.put(1L, new UserState(1L, "admin", "管理员", "13800000001", "admin@uscbinp.com", 1));
-        users.put(2L, new UserState(2L, "demo", "演示用户", "13800000002", "demo@uscbinp.com", 1));
+        this.dataPermissionEvaluator = dataPermissionEvaluator;
+        users.put(1L, new UserState(1L, "admin", "管理员", "13800000001", "admin@uscbinp.com", "3301", 1));
+        users.put(2L, new UserState(2L, "demo", "演示用户", "13800000002", "demo@uscbinp.com", "3302", 1));
         userRoleBindings.put(1L, List.of(1L));
         userRoleBindings.put(2L, List.of(2L));
     }
 
     @Override
-    public UserPageResult listUsers(int pageNum, int pageSize) {
+    public UserPageResult listUsers(int pageNum, int pageSize, DataPermissionContext permissionContext) {
         return systemModelLock.withWriteLock(() -> {
             int resolvedPageNum = pageNum > 0 ? pageNum : DEFAULT_PAGE_NUM;
             int resolvedPageSize = pageSize > 0 ? pageSize : DEFAULT_PAGE_SIZE;
-            List<UserState> orderedUsers = users.values()
+            UserState requester = resolveRequester(permissionContext);
+            if (requester == null) {
+                return new UserPageResult(new PageInfo(resolvedPageNum, resolvedPageSize, 0), List.of());
+            }
+            DataPermissionEvaluator.DataPermissionScope permissionScope = resolvePermissionScope(requester);
+            List<UserState> visibleUsers = users.values()
                 .stream()
                 .sorted(Comparator.comparing(UserState::id))
+                .filter(user -> canView(requester, user, permissionScope))
                 .toList();
-            int fromIndex = Math.min((resolvedPageNum - 1) * resolvedPageSize, orderedUsers.size());
-            int toIndex = Math.min(fromIndex + resolvedPageSize, orderedUsers.size());
-            List<UserItem> list = orderedUsers.subList(fromIndex, toIndex)
+            int fromIndex = Math.min((resolvedPageNum - 1) * resolvedPageSize, visibleUsers.size());
+            int toIndex = Math.min(fromIndex + resolvedPageSize, visibleUsers.size());
+            List<UserItem> list = visibleUsers.subList(fromIndex, toIndex)
                 .stream()
                 .map(this::toItem)
                 .toList();
-            return new UserPageResult(new PageInfo(resolvedPageNum, resolvedPageSize, orderedUsers.size()), list);
+            return new UserPageResult(new PageInfo(resolvedPageNum, resolvedPageSize, visibleUsers.size()), list);
         });
     }
 
@@ -72,6 +83,7 @@ public class SysUserServiceImpl implements SysUserService {
                 command.realName(),
                 command.mobile(),
                 command.email(),
+                null,
                 resolveAccountStatus(command.accountStatus())
             );
             users.put(userId, user);
@@ -91,6 +103,7 @@ public class SysUserServiceImpl implements SysUserService {
                 command.realName(),
                 command.mobile(),
                 command.email(),
+                existing.regionCode(),
                 resolveAccountStatus(command.accountStatus())
             );
             users.put(userId, updated);
@@ -121,6 +134,13 @@ public class SysUserServiceImpl implements SysUserService {
             userRoleBindings.put(userId, List.copyOf(normalizedRoleIds));
             return new UserRoleBindingResult(userId, normalizedRoleIds);
         });
+    }
+
+    @Override
+    public boolean hasRoleBindings(Long roleId) {
+        return systemModelLock.withReadLock(() -> userRoleBindings.values()
+            .stream()
+            .anyMatch(roleIds -> roleIds.contains(roleId)));
     }
 
     private UserState requireUser(Long userId) {
@@ -168,6 +188,66 @@ public class SysUserServiceImpl implements SysUserService {
         }
     }
 
+    private UserState resolveRequester(DataPermissionContext permissionContext) {
+        if (permissionContext == null) {
+            return null;
+        }
+        if (permissionContext.requesterUserId() != null) {
+            UserState userById = users.get(permissionContext.requesterUserId());
+            if (userById != null) {
+                return userById;
+            }
+        }
+        if (StringUtils.hasText(permissionContext.requesterUsername())) {
+            return users.values()
+                .stream()
+                .filter(user -> user.username().equals(permissionContext.requesterUsername().trim()))
+                .findFirst()
+                .orElse(null);
+        }
+        return null;
+    }
+
+    private DataPermissionEvaluator.DataPermissionScope resolvePermissionScope(UserState requester) {
+        DataPermissionEvaluator.UserPermissionProfile profile = new DataPermissionEvaluator.UserPermissionProfile(
+            requester.id(),
+            requester.username(),
+            requester.regionCode(),
+            resolveRoleCodes(requester.id())
+        );
+        return dataPermissionEvaluator.evaluate(profile);
+    }
+
+    private boolean canView(UserState requester,
+                            UserState candidate,
+                            DataPermissionEvaluator.DataPermissionScope scope) {
+        if (scope.fullAccess()) {
+            return true;
+        }
+        if (Objects.equals(requester.id(), candidate.id())) {
+            return true;
+        }
+        if (!StringUtils.hasText(scope.regionCode())) {
+            return false;
+        }
+        return scope.regionCode().equals(candidate.regionCode());
+    }
+
+    private List<String> resolveRoleCodes(Long userId) {
+        return filterExistingRoleIds(userId).stream()
+            .map(this::resolveRoleCode)
+            .filter(StringUtils::hasText)
+            .toList();
+    }
+
+    private String resolveRoleCode(Long roleId) {
+        try {
+            return sysRoleService.getRole(roleId).roleCode();
+        } catch (BusinessException ex) {
+            return null;
+        }
+    }
+
     private String resolveUsername(String username, Long userId) {
         if (StringUtils.hasText(username)) {
             return username.trim();
@@ -193,6 +273,7 @@ public class SysUserServiceImpl implements SysUserService {
                              String realName,
                              String mobile,
                              String email,
+                             String regionCode,
                              Integer accountStatus) {
     }
 }

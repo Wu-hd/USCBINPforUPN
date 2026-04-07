@@ -4,6 +4,7 @@ import com.uscbinp.common.error.ErrorCode;
 import com.uscbinp.common.exception.BusinessException;
 import com.uscbinp.domain.service.system.impl.SysRoleServiceImpl;
 import com.uscbinp.domain.service.system.impl.SysUserServiceImpl;
+import com.uscbinp.domain.service.system.permission.RoleRegionDataPermissionEvaluator;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
@@ -74,15 +75,10 @@ class SysUserServiceImplTest {
     }
 
     @Test
-    void deletedRolesShouldBeFilteredFromUserReadModel() {
-        SystemModelLock lock = new SystemModelLock();
-        SysRoleService roleService = new SysRoleServiceImpl(lock);
-        SysUserServiceImpl service = new SysUserServiceImpl(roleService, lock);
-        SysRoleService.RoleItem temporaryRole = roleService.createRole(
-            new SysRoleService.RoleUpsertCommand("temp_role", "临时角色", 1));
-
-        service.bindRoles(1L, List.of(1L, temporaryRole.id()));
-        roleService.deleteRole(temporaryRole.id());
+    void staleRoleBindingsShouldBeFilteredFromUserReadModel() throws Exception {
+        ServiceFixture fixture = newServiceFixture();
+        SysUserServiceImpl service = fixture.userService();
+        readRoleBindings(service).put(1L, List.of(1L, 999L));
 
         SysUserService.UserItem user = service.getUser(1L);
 
@@ -90,10 +86,10 @@ class SysUserServiceImplTest {
     }
 
     @Test
-    void deletedRoleShouldNotBreakConcurrentBindConsistency() throws Exception {
-        SystemModelLock lock = new SystemModelLock();
-        SysRoleServiceImpl roleService = new SysRoleServiceImpl(lock);
-        SysUserServiceImpl service = new SysUserServiceImpl(roleService, lock);
+    void deletingBoundRoleDuringConcurrentBindingShouldFailConsistently() throws Exception {
+        ServiceFixture fixture = newServiceFixture();
+        SysRoleServiceImpl roleService = fixture.roleService();
+        SysUserServiceImpl service = fixture.userService();
         SysRoleService.RoleItem temporaryRole = roleService.createRole(
             new SysRoleService.RoleUpsertCommand("temp_role_" + System.nanoTime(), "临时角色", 1));
         CountDownLatch streamStarted = new CountDownLatch(1);
@@ -125,13 +121,21 @@ class SysUserServiceImplTest {
         assertFalse(bindThread.isAlive(), "bind thread should finish");
         assertFalse(deleteThread.isAlive(), "delete thread should finish");
         assertNull(bindFailure.get(), "bind should succeed even when delete runs concurrently");
-        assertNull(deleteFailure.get(), "delete should succeed");
-        assertEquals(List.of(1L), service.getUser(1L).roleIds());
+        assertTrue(deleteFailure.get() instanceof BusinessException, "delete should fail while role is still bound");
+        assertEquals(List.of(1L, temporaryRole.id()), service.getUser(1L).roleIds());
     }
 
     private SysUserServiceImpl newService() {
+        return newServiceFixture().userService();
+    }
+
+    private ServiceFixture newServiceFixture() {
         SystemModelLock lock = new SystemModelLock();
-        return new SysUserServiceImpl(new SysRoleServiceImpl(lock), lock);
+        DelegatingUserServiceBridge userServiceBridge = new DelegatingUserServiceBridge();
+        SysRoleServiceImpl roleService = new SysRoleServiceImpl(userServiceBridge, lock);
+        SysUserServiceImpl userService = new SysUserServiceImpl(roleService, lock, new RoleRegionDataPermissionEvaluator());
+        userServiceBridge.bindDelegate(userService);
+        return new ServiceFixture(userService, roleService);
     }
 
     @SuppressWarnings("unchecked")
@@ -168,6 +172,66 @@ class SysUserServiceImplTest {
                 LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(3));
                 return roleId;
             });
+        }
+    }
+
+    private record ServiceFixture(SysUserServiceImpl userService, SysRoleServiceImpl roleService) {
+    }
+
+    private static final class DelegatingUserServiceBridge implements SysUserService {
+
+        private final AtomicReference<SysUserService> delegateRef = new AtomicReference<>();
+
+        private void bindDelegate(SysUserService delegate) {
+            delegateRef.set(delegate);
+        }
+
+        private SysUserService delegate() {
+            SysUserService delegate = delegateRef.get();
+            if (delegate == null) {
+                throw new IllegalStateException("delegate not bound");
+            }
+            return delegate;
+        }
+
+        @Override
+        public UserPageResult listUsers(int pageNum, int pageSize) {
+            return delegate().listUsers(pageNum, pageSize);
+        }
+
+        @Override
+        public UserPageResult listUsers(int pageNum, int pageSize, DataPermissionContext permissionContext) {
+            return delegate().listUsers(pageNum, pageSize, permissionContext);
+        }
+
+        @Override
+        public UserItem getUser(Long userId) {
+            return delegate().getUser(userId);
+        }
+
+        @Override
+        public UserItem createUser(UserUpsertCommand command) {
+            return delegate().createUser(command);
+        }
+
+        @Override
+        public UserItem updateUser(Long userId, UserUpsertCommand command) {
+            return delegate().updateUser(userId, command);
+        }
+
+        @Override
+        public void deleteUser(Long userId) {
+            delegate().deleteUser(userId);
+        }
+
+        @Override
+        public UserRoleBindingResult bindRoles(Long userId, List<Long> roleIds) {
+            return delegate().bindRoles(userId, roleIds);
+        }
+
+        @Override
+        public boolean hasRoleBindings(Long roleId) {
+            return delegate().hasRoleBindings(roleId);
         }
     }
 

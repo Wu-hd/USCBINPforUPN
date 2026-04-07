@@ -2,10 +2,12 @@ package com.uscbinp.app.controller.system;
 
 import com.uscbinp.common.api.ApiResponse;
 import com.uscbinp.domain.service.system.SysUserService;
+import com.uscbinp.infra.security.AuthenticatedUser;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,8 +33,9 @@ public class SysUserController {
     @GetMapping
     public ApiResponse<SysUserService.UserPageResult> listUsers(
         @RequestParam(defaultValue = "1") Integer pageNum,
-        @RequestParam(defaultValue = "10") Integer pageSize) {
-        return ApiResponse.ok(sysUserService.listUsers(pageNum, pageSize));
+        @RequestParam(defaultValue = "10") Integer pageSize,
+        Authentication authentication) {
+        return ApiResponse.ok(sysUserService.listUsers(pageNum, pageSize, resolvePermissionContext(authentication)));
     }
 
     @GetMapping("/{id}")
@@ -73,6 +76,20 @@ public class SysUserController {
         );
     }
 
+    private SysUserService.DataPermissionContext resolvePermissionContext(Authentication authentication) {
+        if (authentication == null || authentication instanceof AnonymousAuthenticationToken) {
+            return new SysUserService.DataPermissionContext(null, null);
+        }
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof AuthenticatedUser authenticatedUser) {
+            return new SysUserService.DataPermissionContext(authenticatedUser.userId(), authenticatedUser.username());
+        }
+        if (principal instanceof String username && !"anonymousUser".equals(username)) {
+            return new SysUserService.DataPermissionContext(null, username);
+        }
+        return new SysUserService.DataPermissionContext(null, null);
+    }
+
     private record UserSaveRequest(@NotBlank String username,
                                    String realName,
                                    String mobile,
@@ -80,6 +97,6 @@ public class SysUserController {
                                    @NotNull Integer accountStatus) {
     }
 
-    private record UserRoleBindRequest(@NotEmpty List<@NotNull Long> roleIds) {
+    private record UserRoleBindRequest(@NotNull List<@NotNull Long> roleIds) {
     }
 }

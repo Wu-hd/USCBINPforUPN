@@ -3,7 +3,9 @@ package com.uscbinp.domain.service.system.impl;
 import com.uscbinp.common.error.ErrorCode;
 import com.uscbinp.common.exception.BusinessException;
 import com.uscbinp.domain.service.system.SysRoleService;
+import com.uscbinp.domain.service.system.SysUserService;
 import com.uscbinp.domain.service.system.SystemModelLock;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -19,11 +21,13 @@ public class SysRoleServiceImpl implements SysRoleService {
     private static final int DEFAULT_PAGE_NUM = 1;
     private static final int DEFAULT_PAGE_SIZE = 10;
 
+    private final SysUserService sysUserService;
     private final SystemModelLock systemModelLock;
     private final Map<Long, RoleState> roles = new ConcurrentHashMap<>();
     private final AtomicLong roleIdSequence = new AtomicLong(100L);
 
-    public SysRoleServiceImpl(SystemModelLock systemModelLock) {
+    public SysRoleServiceImpl(@Lazy SysUserService sysUserService, SystemModelLock systemModelLock) {
+        this.sysUserService = sysUserService;
         this.systemModelLock = systemModelLock;
         roles.put(1L, new RoleState(1L, "sys_admin", "系统管理员", 1));
         roles.put(2L, new RoleState(2L, "ops_user", "运维用户", 1));
@@ -91,6 +95,9 @@ public class SysRoleServiceImpl implements SysRoleService {
     public void deleteRole(Long roleId) {
         systemModelLock.withWriteLock(() -> {
             requireRole(roleId);
+            if (sysUserService.hasRoleBindings(roleId)) {
+                throw new BusinessException(ErrorCode.BUSINESS_ERROR.getCode(), "角色仍被用户绑定:" + roleId);
+            }
             roles.remove(roleId);
         });
     }

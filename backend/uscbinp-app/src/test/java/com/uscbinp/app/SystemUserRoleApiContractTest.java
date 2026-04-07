@@ -48,6 +48,20 @@ class SystemUserRoleApiContractTest {
     }
 
     @Test
+    void listUsersWithNonAdminTokenShouldBeRestrictedByRegion() throws Exception {
+        String token = jwtTokenProvider.generateToken("2:demo");
+        mockMvc.perform(get("/api/system/users")
+                .param("pageNum", "1")
+                .param("pageSize", "10")
+                .header("Authorization", "Bearer " + token))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.code").value("00000"))
+            .andExpect(jsonPath("$.data.page.total").value(1))
+            .andExpect(jsonPath("$.data.list[0].username").value("demo"))
+            .andExpect(jsonPath("$.data.list[1]").doesNotExist());
+    }
+
+    @Test
     void bindRolesWithTokenShouldReturnUnifiedResponse() throws Exception {
         String token = jwtTokenProvider.generateToken("1:admin");
         mockMvc.perform(put("/api/system/users/{id}/roles", 1L)
@@ -66,6 +80,24 @@ class SystemUserRoleApiContractTest {
     }
 
     @Test
+    void bindRolesShouldAllowClearingAllBindings() throws Exception {
+        String token = jwtTokenProvider.generateToken("1:admin");
+        mockMvc.perform(put("/api/system/users/{id}/roles", 1L)
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {
+                      "roleIds": []
+                    }
+                    """))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.code").value("00000"))
+            .andExpect(jsonPath("$.data.userId").value(1))
+            .andExpect(jsonPath("$.data.roleIds").isArray())
+            .andExpect(jsonPath("$.data.roleIds[0]").doesNotExist());
+    }
+
+    @Test
     void bindRolesWithNonExistentRoleShouldReturnBusinessErrorCode() throws Exception {
         String token = jwtTokenProvider.generateToken("1:admin");
         mockMvc.perform(put("/api/system/users/{id}/roles", 1L)
@@ -81,7 +113,7 @@ class SystemUserRoleApiContractTest {
     }
 
     @Test
-    void deletedRoleShouldNotBeReturnedFromUserApiRoleIds() throws Exception {
+    void deletingBoundRoleShouldBeRejectedAndRoleShouldDisappearAfterUnbind() throws Exception {
         String token = jwtTokenProvider.generateToken("1:admin");
         String roleCode = "temp_role_" + System.nanoTime();
         MvcResult createdRole = mockMvc.perform(post("/api/system/roles")
@@ -107,6 +139,22 @@ class SystemUserRoleApiContractTest {
                       "roleIds": [1, %d]
                     }
                     """.formatted(roleId)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.code").value("00000"));
+
+        mockMvc.perform(delete("/api/system/roles/{id}", roleId)
+                .header("Authorization", "Bearer " + token))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.code").value("BIZ_4001"));
+
+        mockMvc.perform(put("/api/system/users/{id}/roles", 1L)
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {
+                      "roleIds": [1]
+                    }
+                    """))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.code").value("00000"));
 
