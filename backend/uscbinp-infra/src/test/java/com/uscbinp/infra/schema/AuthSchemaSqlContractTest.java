@@ -20,16 +20,35 @@ class AuthSchemaSqlContractTest {
             "updated_time", "datetime",
             "is_deleted", "tinyint"
     );
+    private static final Map<String, String> REQUIRED_SYS_USER_COLUMNS = Map.of(
+            "username", "varchar(64)",
+            "password_hash", "varchar(255)",
+            "real_name", "varchar(64)",
+            "account_status", "tinyint"
+    );
+    private static final Map<String, String> REQUIRED_SYS_ROLE_COLUMNS = Map.of(
+            "role_code", "varchar(64)",
+            "role_name", "varchar(64)",
+            "role_status", "tinyint"
+    );
+    private static final Map<String, String> REQUIRED_SYS_USER_ROLE_COLUMNS = Map.of(
+            "user_id", "bigint",
+            "role_id", "bigint"
+    );
+    private static final Map<String, String> REQUIRED_SYS_ROLE_MENU_COLUMNS = Map.of(
+            "role_id", "bigint",
+            "menu_code", "varchar(64)"
+    );
 
     @Test
     void shouldContainRequiredAuthTablesAndAuditColumns() {
         String sql = SqlResourceLoader.loadAsString("sql/task2-core-schema.sql").toLowerCase();
 
         assertAll(
-                () -> assertTableHasAuditColumns(sql, "sys_user"),
-                () -> assertTableHasAuditColumns(sql, "sys_role"),
-                () -> assertTableHasAuditColumns(sql, "sys_user_role"),
-                () -> assertTableHasAuditColumns(sql, "sys_role_menu")
+                () -> assertTableHasColumns(sql, "sys_user", REQUIRED_AUDIT_COLUMNS, REQUIRED_SYS_USER_COLUMNS),
+                () -> assertTableHasColumns(sql, "sys_role", REQUIRED_AUDIT_COLUMNS, REQUIRED_SYS_ROLE_COLUMNS),
+                () -> assertTableHasColumns(sql, "sys_user_role", REQUIRED_AUDIT_COLUMNS, REQUIRED_SYS_USER_ROLE_COLUMNS),
+                () -> assertTableHasColumns(sql, "sys_role_menu", REQUIRED_AUDIT_COLUMNS, REQUIRED_SYS_ROLE_MENU_COLUMNS)
         );
     }
 
@@ -53,7 +72,7 @@ class AuthSchemaSqlContractTest {
                     is_deleted int
                 );
                 """;
-        assertThrows(AssertionError.class, () -> assertTableHasAuditColumns(sql, "sys_user"));
+        assertThrows(AssertionError.class, () -> assertTableHasColumns(sql, "sys_user", REQUIRED_AUDIT_COLUMNS));
     }
 
     @Test
@@ -70,15 +89,18 @@ class AuthSchemaSqlContractTest {
         );
     }
 
-    private static void assertTableHasAuditColumns(String sql, String tableName) {
+    @SafeVarargs
+    private static void assertTableHasColumns(String sql, String tableName, Map<String, String>... requiredColumns) {
         String tableBody = extractCreateTableBody(sql, tableName);
-        for (Map.Entry<String, String> auditColumn : REQUIRED_AUDIT_COLUMNS.entrySet()) {
-            String columnName = auditColumn.getKey();
-            String expectedType = auditColumn.getValue();
-            assertTrue(
-                    hasColumnWithType(tableBody, columnName, expectedType),
-                    () -> tableName + " must define " + columnName + " as " + expectedType
-            );
+        for (Map<String, String> columns : requiredColumns) {
+            for (Map.Entry<String, String> column : columns.entrySet()) {
+                String columnName = column.getKey();
+                String expectedType = column.getValue();
+                assertTrue(
+                        hasColumnWithType(tableBody, columnName, expectedType),
+                        () -> tableName + " must define " + columnName + " as " + expectedType
+                );
+            }
         }
     }
 
@@ -99,7 +121,7 @@ class AuthSchemaSqlContractTest {
 
     private static boolean hasColumnWithType(String tableBody, String columnName, String expectedType) {
         return Pattern.compile(
-                        "(?im)^\\s*`?" + Pattern.quote(columnName) + "`?\\s+" + Pattern.quote(expectedType) + "\\b")
+                        "(?im)^\\s*`?" + Pattern.quote(columnName) + "`?\\s+" + Pattern.quote(expectedType) + "(?=\\s|,|$)")
                 .matcher(tableBody)
                 .find();
     }

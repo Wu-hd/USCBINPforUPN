@@ -1,7 +1,9 @@
 CREATE TABLE IF NOT EXISTS sys_user (
     id BIGINT PRIMARY KEY,
     username VARCHAR(64) NOT NULL,
-    password VARCHAR(255) NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    real_name VARCHAR(64) NOT NULL,
+    account_status TINYINT NOT NULL DEFAULT 1,
     created_by BIGINT,
     created_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_by BIGINT,
@@ -12,7 +14,8 @@ CREATE TABLE IF NOT EXISTS sys_user (
 CREATE TABLE IF NOT EXISTS sys_role (
     id BIGINT PRIMARY KEY,
     role_code VARCHAR(64) NOT NULL,
-    role_name VARCHAR(128) NOT NULL,
+    role_name VARCHAR(64) NOT NULL,
+    role_status TINYINT NOT NULL DEFAULT 1,
     created_by BIGINT,
     created_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_by BIGINT,
