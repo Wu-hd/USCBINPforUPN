@@ -5,6 +5,8 @@ import com.uscbinp.common.exception.BusinessException;
 import com.uscbinp.domain.service.auth.AuthDataAccess;
 import com.uscbinp.domain.service.auth.AuthService;
 import org.springframework.lang.Nullable;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -16,10 +18,11 @@ import java.util.Optional;
 public class AuthServiceImpl implements AuthService {
 
     private static final String DEFAULT_UNKNOWN_USERNAME = "unknown";
+    private static final PasswordEncoder PASSWORD_ENCODER = new BCryptPasswordEncoder();
 
     private static final Map<String, FallbackUser> FALLBACK_USERS = Map.of(
-        "admin", new FallbackUser(1L, "admin123", List.of("system:dashboard", "system:user", "system:role")),
-        "demo", new FallbackUser(2L, "demo123", List.of("system:dashboard"))
+        "admin", new FallbackUser(1L, PASSWORD_ENCODER.encode("admin123"), List.of("system:dashboard", "system:user", "system:role")),
+        "demo", new FallbackUser(2L, PASSWORD_ENCODER.encode("demo123"), List.of("system:dashboard"))
     );
 
     private final AuthDataAccess authDataAccess;
@@ -40,7 +43,7 @@ public class AuthServiceImpl implements AuthService {
         }
 
         FallbackUser fallbackUser = FALLBACK_USERS.get(username);
-        if (fallbackUser != null && fallbackUser.password().equals(password)) {
+        if (fallbackUser != null && passwordMatches(password, fallbackUser.passwordHash())) {
             return new AuthLoginResult(fallbackUser.userId(), username);
         }
         throw loginFailed();
@@ -118,7 +121,9 @@ public class AuthServiceImpl implements AuthService {
     }
 
     private boolean passwordMatches(String rawPassword, String persistedPasswordHash) {
-        return StringUtils.hasText(persistedPasswordHash) && persistedPasswordHash.equals(rawPassword);
+        return StringUtils.hasText(rawPassword)
+            && StringUtils.hasText(persistedPasswordHash)
+            && PASSWORD_ENCODER.matches(rawPassword, persistedPasswordHash);
     }
 
     private boolean isAccountEnabled(Integer accountStatus) {
@@ -129,7 +134,7 @@ public class AuthServiceImpl implements AuthService {
         return new BusinessException(ErrorCode.AUTH_LOGIN_FAILED.getCode(), ErrorCode.AUTH_LOGIN_FAILED.getMessage());
     }
 
-    private record FallbackUser(Long userId, String password, List<String> menus) {
+    private record FallbackUser(Long userId, String passwordHash, List<String> menus) {
     }
 
     private record FallbackResolvedUser(String username, FallbackUser user) {

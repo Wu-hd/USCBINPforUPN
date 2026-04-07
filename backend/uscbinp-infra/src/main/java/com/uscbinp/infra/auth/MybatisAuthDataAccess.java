@@ -33,8 +33,7 @@ public class MybatisAuthDataAccess implements AuthDataAccess {
     @Override
     public Optional<AuthUserSnapshot> findUserByUsername(String username) {
         SysUserEntity user = sysUserMapper.selectOne(Wrappers.<SysUserEntity>lambdaQuery()
-            .eq(SysUserEntity::getUsername, username)
-            .last("LIMIT 1"));
+            .eq(SysUserEntity::getUsername, username));
         return Optional.ofNullable(user).map(this::toSnapshot);
     }
 
