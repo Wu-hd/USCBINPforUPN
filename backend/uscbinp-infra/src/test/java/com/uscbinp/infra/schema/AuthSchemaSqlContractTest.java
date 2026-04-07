@@ -89,6 +89,20 @@ class AuthSchemaSqlContractTest {
         );
     }
 
+    @Test
+    void shouldDefineRequiredCompositeUniqueConstraints() {
+        String sql = SqlResourceLoader.loadAsString("sql/task2-core-schema.sql").toLowerCase();
+
+        assertAll(
+                () -> assertTrue(
+                        hasCompositeUniqueConstraint(extractCreateTableBody(sql, "sys_user_role"), "user_id", "role_id"),
+                        "sys_user_role must define unique(user_id, role_id)"),
+                () -> assertTrue(
+                        hasCompositeUniqueConstraint(extractCreateTableBody(sql, "sys_role_menu"), "role_id", "menu_code"),
+                        "sys_role_menu must define unique(role_id, menu_code)")
+        );
+    }
+
     @SafeVarargs
     private static void assertTableHasColumns(String sql, String tableName, Map<String, String>... requiredColumns) {
         String tableBody = extractCreateTableBody(sql, tableName);
@@ -122,6 +136,17 @@ class AuthSchemaSqlContractTest {
     private static boolean hasColumnWithType(String tableBody, String columnName, String expectedType) {
         return Pattern.compile(
                         "(?im)^\\s*`?" + Pattern.quote(columnName) + "`?\\s+" + Pattern.quote(expectedType) + "(?=\\s|,|$)")
+                .matcher(tableBody)
+                .find();
+    }
+
+    private static boolean hasCompositeUniqueConstraint(String tableBody, String firstColumn, String secondColumn) {
+        return Pattern.compile(
+                        "(?is)(?:constraint\\s+`?\\w+`?\\s+)?unique(?:\\s+key\\s+`?\\w+`?)?\\s*\\(\\s*`?"
+                                + Pattern.quote(firstColumn)
+                                + "`?\\s*,\\s*`?"
+                                + Pattern.quote(secondColumn)
+                                + "`?\\s*\\)")
                 .matcher(tableBody)
                 .find();
     }
