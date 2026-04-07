@@ -3,6 +3,7 @@ package com.uscbinp.domain.service.system.impl;
 import com.uscbinp.common.error.ErrorCode;
 import com.uscbinp.common.exception.BusinessException;
 import com.uscbinp.domain.service.system.SysRoleService;
+import com.uscbinp.domain.service.system.UserRoleConsistencyLock;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -18,70 +19,82 @@ public class SysRoleServiceImpl implements SysRoleService {
     private static final int DEFAULT_PAGE_NUM = 1;
     private static final int DEFAULT_PAGE_SIZE = 10;
 
+    private final UserRoleConsistencyLock userRoleConsistencyLock;
     private final Map<Long, RoleState> roles = new ConcurrentHashMap<>();
     private final AtomicLong roleIdSequence = new AtomicLong(100L);
 
-    public SysRoleServiceImpl() {
+    public SysRoleServiceImpl(UserRoleConsistencyLock userRoleConsistencyLock) {
+        this.userRoleConsistencyLock = userRoleConsistencyLock;
         roles.put(1L, new RoleState(1L, "sys_admin", "系统管理员", 1));
         roles.put(2L, new RoleState(2L, "ops_user", "运维用户", 1));
     }
 
     @Override
-    public synchronized RolePageResult listRoles(int pageNum, int pageSize) {
-        int resolvedPageNum = pageNum > 0 ? pageNum : DEFAULT_PAGE_NUM;
-        int resolvedPageSize = pageSize > 0 ? pageSize : DEFAULT_PAGE_SIZE;
-        List<RoleState> orderedRoles = roles.values()
-            .stream()
-            .sorted(Comparator.comparing(RoleState::id))
-            .toList();
-        int fromIndex = Math.min((resolvedPageNum - 1) * resolvedPageSize, orderedRoles.size());
-        int toIndex = Math.min(fromIndex + resolvedPageSize, orderedRoles.size());
-        List<RoleItem> list = orderedRoles.subList(fromIndex, toIndex)
-            .stream()
-            .map(this::toItem)
-            .toList();
-        return new RolePageResult(new PageInfo(resolvedPageNum, resolvedPageSize, orderedRoles.size()), list);
+    public RolePageResult listRoles(int pageNum, int pageSize) {
+        synchronized (userRoleConsistencyLock.monitor()) {
+            int resolvedPageNum = pageNum > 0 ? pageNum : DEFAULT_PAGE_NUM;
+            int resolvedPageSize = pageSize > 0 ? pageSize : DEFAULT_PAGE_SIZE;
+            List<RoleState> orderedRoles = roles.values()
+                .stream()
+                .sorted(Comparator.comparing(RoleState::id))
+                .toList();
+            int fromIndex = Math.min((resolvedPageNum - 1) * resolvedPageSize, orderedRoles.size());
+            int toIndex = Math.min(fromIndex + resolvedPageSize, orderedRoles.size());
+            List<RoleItem> list = orderedRoles.subList(fromIndex, toIndex)
+                .stream()
+                .map(this::toItem)
+                .toList();
+            return new RolePageResult(new PageInfo(resolvedPageNum, resolvedPageSize, orderedRoles.size()), list);
+        }
     }
 
     @Override
-    public synchronized RoleItem getRole(Long roleId) {
-        return toItem(requireRole(roleId));
+    public RoleItem getRole(Long roleId) {
+        synchronized (userRoleConsistencyLock.monitor()) {
+            return toItem(requireRole(roleId));
+        }
     }
 
     @Override
-    public synchronized RoleItem createRole(RoleUpsertCommand command) {
-        Long roleId = roleIdSequence.incrementAndGet();
-        String roleCode = resolveRoleCode(command.roleCode(), roleId);
-        ensureRoleCodeUnique(roleCode, null);
-        RoleState role = new RoleState(
-            roleId,
-            roleCode,
-            resolveRoleName(command.roleName(), roleId),
-            resolveRoleStatus(command.roleStatus())
-        );
-        roles.put(roleId, role);
-        return toItem(role);
+    public RoleItem createRole(RoleUpsertCommand command) {
+        synchronized (userRoleConsistencyLock.monitor()) {
+            Long roleId = roleIdSequence.incrementAndGet();
+            String roleCode = resolveRoleCode(command.roleCode(), roleId);
+            ensureRoleCodeUnique(roleCode, null);
+            RoleState role = new RoleState(
+                roleId,
+                roleCode,
+                resolveRoleName(command.roleName(), roleId),
+                resolveRoleStatus(command.roleStatus())
+            );
+            roles.put(roleId, role);
+            return toItem(role);
+        }
     }
 
     @Override
-    public synchronized RoleItem updateRole(Long roleId, RoleUpsertCommand command) {
-        requireRole(roleId);
-        String roleCode = resolveRoleCode(command.roleCode(), roleId);
-        ensureRoleCodeUnique(roleCode, roleId);
-        RoleState role = new RoleState(
-            roleId,
-            roleCode,
-            resolveRoleName(command.roleName(), roleId),
-            resolveRoleStatus(command.roleStatus())
-        );
-        roles.put(roleId, role);
-        return toItem(role);
+    public RoleItem updateRole(Long roleId, RoleUpsertCommand command) {
+        synchronized (userRoleConsistencyLock.monitor()) {
+            requireRole(roleId);
+            String roleCode = resolveRoleCode(command.roleCode(), roleId);
+            ensureRoleCodeUnique(roleCode, roleId);
+            RoleState role = new RoleState(
+                roleId,
+                roleCode,
+                resolveRoleName(command.roleName(), roleId),
+                resolveRoleStatus(command.roleStatus())
+            );
+            roles.put(roleId, role);
+            return toItem(role);
+        }
     }
 
     @Override
-    public synchronized void deleteRole(Long roleId) {
-        requireRole(roleId);
-        roles.remove(roleId);
+    public void deleteRole(Long roleId) {
+        synchronized (userRoleConsistencyLock.monitor()) {
+            requireRole(roleId);
+            roles.remove(roleId);
+        }
     }
 
     private RoleState requireRole(Long roleId) {

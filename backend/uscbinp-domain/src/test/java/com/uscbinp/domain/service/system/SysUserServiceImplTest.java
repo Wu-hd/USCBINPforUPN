@@ -7,13 +7,12 @@ import com.uscbinp.domain.service.system.impl.SysUserServiceImpl;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.AbstractList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.LockSupport;
 import java.util.stream.Stream;
 
@@ -23,15 +22,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class SysUserServiceImplTest {
-
-    @Test
-    void readMethodsShouldBeSynchronizedForAtomicComposition() throws Exception {
-        Method listUsers = SysUserServiceImpl.class.getMethod("listUsers", int.class, int.class);
-        Method getUser = SysUserServiceImpl.class.getMethod("getUser", Long.class);
-
-        assertTrue(Modifier.isSynchronized(listUsers.getModifiers()));
-        assertTrue(Modifier.isSynchronized(getUser.getModifiers()));
-    }
 
     @Test
     void createUserShouldRejectDuplicateUsername() {
@@ -84,8 +74,9 @@ class SysUserServiceImplTest {
 
     @Test
     void deletedRolesShouldBeFilteredFromUserReadModel() {
-        SysRoleService roleService = new SysRoleServiceImpl();
-        SysUserServiceImpl service = new SysUserServiceImpl(roleService);
+        UserRoleConsistencyLock lock = new UserRoleConsistencyLock();
+        SysRoleService roleService = new SysRoleServiceImpl(lock);
+        SysUserServiceImpl service = new SysUserServiceImpl(roleService, lock);
         SysRoleService.RoleItem temporaryRole = roleService.createRole(
             new SysRoleService.RoleUpsertCommand("temp_role", "临时角色", 1));
 
@@ -97,8 +88,42 @@ class SysUserServiceImplTest {
         assertEquals(List.of(1L), user.roleIds());
     }
 
+    @Test
+    void deletedRoleIdsShouldNotBeExposedDuringConcurrentReadAndDelete() throws Exception {
+        UserRoleConsistencyLock lock = new UserRoleConsistencyLock();
+        CoordinatedDeleteRoleService roleService = new CoordinatedDeleteRoleService(lock);
+        SysUserServiceImpl service = new SysUserServiceImpl(roleService, lock);
+        SysRoleService.RoleItem temporaryRole = roleService.createRole(
+            new SysRoleService.RoleUpsertCommand("temp_role_" + System.nanoTime(), "临时角色", 1));
+        service.bindRoles(1L, List.of(1L, temporaryRole.id()));
+
+        AtomicReference<SysUserService.UserItem> readUser = new AtomicReference<>();
+        AtomicReference<Throwable> readFailure = new AtomicReference<>();
+        Thread deleteThread = new Thread(() -> roleService.deleteRole(temporaryRole.id()), "delete-role-thread");
+        deleteThread.start();
+        assertTrue(roleService.awaitDeleteHoldingLock(2, TimeUnit.SECONDS), "delete thread should hold shared lock");
+
+        Thread readThread = new Thread(() -> {
+            try {
+                readUser.set(service.getUser(1L));
+            } catch (Throwable throwable) {
+                readFailure.set(throwable);
+            }
+        }, "read-user-thread");
+        readThread.start();
+        roleService.releaseDelete();
+
+        deleteThread.join(3000);
+        readThread.join(3000);
+        assertFalse(deleteThread.isAlive(), "delete thread should finish");
+        assertFalse(readThread.isAlive(), "read thread should finish");
+        assertEquals(null, readFailure.get());
+        assertEquals(List.of(1L), readUser.get().roleIds());
+    }
+
     private SysUserServiceImpl newService() {
-        return new SysUserServiceImpl(new SysRoleServiceImpl());
+        UserRoleConsistencyLock lock = new UserRoleConsistencyLock();
+        return new SysUserServiceImpl(new SysRoleServiceImpl(lock), lock);
     }
 
     @SuppressWarnings("unchecked")
@@ -135,6 +160,46 @@ class SysUserServiceImplTest {
                 LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(3));
                 return roleId;
             });
+        }
+    }
+
+    private static final class CoordinatedDeleteRoleService extends SysRoleServiceImpl {
+
+        private final UserRoleConsistencyLock lock;
+        private final CountDownLatch deleteHoldingLock = new CountDownLatch(1);
+        private final CountDownLatch releaseDelete = new CountDownLatch(1);
+
+        private CoordinatedDeleteRoleService(UserRoleConsistencyLock lock) {
+            super(lock);
+            this.lock = lock;
+        }
+
+        @Override
+        public void deleteRole(Long roleId) {
+            synchronized (lock.monitor()) {
+                deleteHoldingLock.countDown();
+                awaitRelease();
+                super.deleteRole(roleId);
+            }
+        }
+
+        private boolean awaitDeleteHoldingLock(long timeout, TimeUnit unit) throws InterruptedException {
+            return deleteHoldingLock.await(timeout, unit);
+        }
+
+        private void releaseDelete() {
+            releaseDelete.countDown();
+        }
+
+        private void awaitRelease() {
+            try {
+                if (!releaseDelete.await(2, TimeUnit.SECONDS)) {
+                    throw new IllegalStateException("delete release timeout");
+                }
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+                throw new IllegalStateException("delete thread interrupted", ex);
+            }
         }
     }
 }
