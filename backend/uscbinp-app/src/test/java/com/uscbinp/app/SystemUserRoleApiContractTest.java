@@ -1,20 +1,26 @@
 package com.uscbinp.app;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.uscbinp.infra.jwt.JwtTokenProvider;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class SystemUserRoleApiContractTest {
 
     @Autowired
@@ -22,6 +28,9 @@ class SystemUserRoleApiContractTest {
 
     @Autowired
     JwtTokenProvider jwtTokenProvider;
+
+    @Autowired
+    ObjectMapper objectMapper;
 
     @Test
     void listUsersWithTokenShouldReturnUnifiedPagedResponse() throws Exception {
@@ -54,5 +63,63 @@ class SystemUserRoleApiContractTest {
             .andExpect(jsonPath("$.data.userId").value(1))
             .andExpect(jsonPath("$.data.roleIds[0]").value(1))
             .andExpect(jsonPath("$.data.roleIds[1]").value(2));
+    }
+
+    @Test
+    void bindRolesWithNonExistentRoleShouldReturnBusinessErrorCode() throws Exception {
+        String token = jwtTokenProvider.generateToken("1:admin");
+        mockMvc.perform(put("/api/system/users/{id}/roles", 1L)
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {
+                      "roleIds": [999]
+                    }
+                    """))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.code").value("BIZ_4001"));
+    }
+
+    @Test
+    void deletedRoleShouldNotBeReturnedFromUserApiRoleIds() throws Exception {
+        String token = jwtTokenProvider.generateToken("1:admin");
+        String roleCode = "temp_role_" + System.nanoTime();
+        MvcResult createdRole = mockMvc.perform(post("/api/system/roles")
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {
+                      "roleCode": "%s",
+                      "roleName": "临时角色",
+                      "roleStatus": 1
+                    }
+                    """.formatted(roleCode)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.code").value("00000"))
+            .andReturn();
+        Long roleId = objectMapper.readTree(createdRole.getResponse().getContentAsString()).path("data").path("id").asLong();
+
+        mockMvc.perform(put("/api/system/users/{id}/roles", 1L)
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {
+                      "roleIds": [1, %d]
+                    }
+                    """.formatted(roleId)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.code").value("00000"));
+
+        mockMvc.perform(delete("/api/system/roles/{id}", roleId)
+                .header("Authorization", "Bearer " + token))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.code").value("00000"));
+
+        mockMvc.perform(get("/api/system/users/{id}", 1L)
+                .header("Authorization", "Bearer " + token))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.code").value("00000"))
+            .andExpect(jsonPath("$.data.roleIds[0]").value(1))
+            .andExpect(jsonPath("$.data.roleIds[1]").doesNotExist());
     }
 }

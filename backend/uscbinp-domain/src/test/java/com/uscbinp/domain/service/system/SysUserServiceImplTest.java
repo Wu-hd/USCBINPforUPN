@@ -2,6 +2,7 @@ package com.uscbinp.domain.service.system;
 
 import com.uscbinp.common.error.ErrorCode;
 import com.uscbinp.common.exception.BusinessException;
+import com.uscbinp.domain.service.system.impl.SysRoleServiceImpl;
 import com.uscbinp.domain.service.system.impl.SysUserServiceImpl;
 import org.junit.jupiter.api.Test;
 
@@ -34,7 +35,7 @@ class SysUserServiceImplTest {
 
     @Test
     void createUserShouldRejectDuplicateUsername() {
-        SysUserService service = new SysUserServiceImpl();
+        SysUserService service = newService();
 
         BusinessException ex = assertThrows(BusinessException.class,
             () -> service.createUser(new SysUserService.UserUpsertCommand("admin", "重复用户", "13800000999", "dup@uscbinp.com", 1)));
@@ -44,7 +45,7 @@ class SysUserServiceImplTest {
 
     @Test
     void updateUserShouldRejectDuplicateUsername() {
-        SysUserService service = new SysUserServiceImpl();
+        SysUserService service = newService();
 
         BusinessException ex = assertThrows(BusinessException.class,
             () -> service.updateUser(2L, new SysUserService.UserUpsertCommand("admin", "演示用户", "13800000002", "demo@uscbinp.com", 1)));
@@ -54,11 +55,11 @@ class SysUserServiceImplTest {
 
     @Test
     void bindRolesShouldNotLeaveBindingsForDeletedUser() throws Exception {
-        SysUserServiceImpl service = new SysUserServiceImpl();
+        SysUserServiceImpl service = newService();
         SysUserService.UserItem created = service.createUser(
             new SysUserService.UserUpsertCommand("race-user", "并发用户", "13800000888", "race@uscbinp.com", 1));
         CountDownLatch streamStarted = new CountDownLatch(1);
-        List<Long> slowRoleIds = new SlowRoleIdList(List.of(1L, 2L, 2L, 3L, 1L, 2L, 3L, 1L), streamStarted);
+        List<Long> slowRoleIds = new SlowRoleIdList(List.of(1L, 2L, 2L, 1L, 2L, 1L), streamStarted);
 
         Thread bindThread = new Thread(() -> service.bindRoles(created.id(), slowRoleIds));
         bindThread.start();
@@ -70,6 +71,34 @@ class SysUserServiceImplTest {
         assertFalse(bindThread.isAlive(), "bind thread should finish");
         assertThrows(BusinessException.class, () -> service.getUser(created.id()));
         assertFalse(readRoleBindings(service).containsKey(created.id()), "deleted user should not keep role bindings");
+    }
+
+    @Test
+    void bindRolesShouldRejectNonExistentRoleIds() {
+        SysUserService service = newService();
+
+        BusinessException ex = assertThrows(BusinessException.class, () -> service.bindRoles(1L, List.of(999L)));
+
+        assertEquals(ErrorCode.BUSINESS_ERROR.getCode(), ex.getCode());
+    }
+
+    @Test
+    void deletedRolesShouldBeFilteredFromUserReadModel() {
+        SysRoleService roleService = new SysRoleServiceImpl();
+        SysUserServiceImpl service = new SysUserServiceImpl(roleService);
+        SysRoleService.RoleItem temporaryRole = roleService.createRole(
+            new SysRoleService.RoleUpsertCommand("temp_role", "临时角色", 1));
+
+        service.bindRoles(1L, List.of(1L, temporaryRole.id()));
+        roleService.deleteRole(temporaryRole.id());
+
+        SysUserService.UserItem user = service.getUser(1L);
+
+        assertEquals(List.of(1L), user.roleIds());
+    }
+
+    private SysUserServiceImpl newService() {
+        return new SysUserServiceImpl(new SysRoleServiceImpl());
     }
 
     @SuppressWarnings("unchecked")

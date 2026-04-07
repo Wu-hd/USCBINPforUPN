@@ -2,6 +2,7 @@ package com.uscbinp.domain.service.system.impl;
 
 import com.uscbinp.common.error.ErrorCode;
 import com.uscbinp.common.exception.BusinessException;
+import com.uscbinp.domain.service.system.SysRoleService;
 import com.uscbinp.domain.service.system.SysUserService;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -19,11 +20,13 @@ public class SysUserServiceImpl implements SysUserService {
     private static final int DEFAULT_PAGE_NUM = 1;
     private static final int DEFAULT_PAGE_SIZE = 10;
 
+    private final SysRoleService sysRoleService;
     private final Map<Long, UserState> users = new ConcurrentHashMap<>();
     private final Map<Long, List<Long>> userRoleBindings = new ConcurrentHashMap<>();
     private final AtomicLong userIdSequence = new AtomicLong(100L);
 
-    public SysUserServiceImpl() {
+    public SysUserServiceImpl(SysRoleService sysRoleService) {
+        this.sysRoleService = sysRoleService;
         users.put(1L, new UserState(1L, "admin", "管理员", "13800000001", "admin@uscbinp.com", 1));
         users.put(2L, new UserState(2L, "demo", "演示用户", "13800000002", "demo@uscbinp.com", 1));
         userRoleBindings.put(1L, List.of(1L));
@@ -102,6 +105,7 @@ public class SysUserServiceImpl implements SysUserService {
                 .filter(Objects::nonNull)
                 .distinct()
                 .toList();
+        normalizedRoleIds.forEach(this::requireRole);
         userRoleBindings.put(userId, List.copyOf(normalizedRoleIds));
         return new UserRoleBindingResult(userId, normalizedRoleIds);
     }
@@ -115,6 +119,7 @@ public class SysUserServiceImpl implements SysUserService {
     }
 
     private UserItem toItem(UserState user) {
+        List<Long> roleIds = filterExistingRoleIds(user.id());
         return new UserItem(
             user.id(),
             user.username(),
@@ -122,8 +127,32 @@ public class SysUserServiceImpl implements SysUserService {
             user.mobile(),
             user.email(),
             user.accountStatus(),
-            userRoleBindings.getOrDefault(user.id(), List.of())
+            roleIds
         );
+    }
+
+    private void requireRole(Long roleId) {
+        sysRoleService.getRole(roleId);
+    }
+
+    private List<Long> filterExistingRoleIds(Long userId) {
+        List<Long> roleIds = userRoleBindings.getOrDefault(userId, List.of());
+        List<Long> filteredRoleIds = roleIds.stream()
+            .filter(this::roleExists)
+            .toList();
+        if (!roleIds.equals(filteredRoleIds)) {
+            userRoleBindings.put(userId, List.copyOf(filteredRoleIds));
+        }
+        return filteredRoleIds;
+    }
+
+    private boolean roleExists(Long roleId) {
+        try {
+            requireRole(roleId);
+            return true;
+        } catch (BusinessException ex) {
+            return false;
+        }
     }
 
     private String resolveUsername(String username, Long userId) {
