@@ -31,7 +31,7 @@ public class SysUserServiceImpl implements SysUserService {
     }
 
     @Override
-    public UserPageResult listUsers(int pageNum, int pageSize) {
+    public synchronized UserPageResult listUsers(int pageNum, int pageSize) {
         int resolvedPageNum = pageNum > 0 ? pageNum : DEFAULT_PAGE_NUM;
         int resolvedPageSize = pageSize > 0 ? pageSize : DEFAULT_PAGE_SIZE;
         List<UserState> orderedUsers = users.values()
@@ -48,7 +48,7 @@ public class SysUserServiceImpl implements SysUserService {
     }
 
     @Override
-    public UserItem getUser(Long userId) {
+    public synchronized UserItem getUser(Long userId) {
         return toItem(requireUser(userId));
     }
 

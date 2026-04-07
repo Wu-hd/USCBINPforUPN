@@ -5,10 +5,21 @@ import com.uscbinp.common.exception.BusinessException;
 import com.uscbinp.domain.service.system.impl.SysRoleServiceImpl;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class SysRoleServiceImplTest {
+
+    @Test
+    void deleteRoleShouldBeSynchronizedForConsistencyWithMutations() throws Exception {
+        Method deleteRole = SysRoleServiceImpl.class.getMethod("deleteRole", Long.class);
+
+        assertTrue(Modifier.isSynchronized(deleteRole.getModifiers()));
+    }
 
     @Test
     void createRoleShouldRejectDuplicateRoleCode() {

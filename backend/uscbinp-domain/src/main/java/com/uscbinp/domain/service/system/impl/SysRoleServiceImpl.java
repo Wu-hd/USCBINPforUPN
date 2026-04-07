@@ -79,7 +79,7 @@ public class SysRoleServiceImpl implements SysRoleService {
     }
 
     @Override
-    public void deleteRole(Long roleId) {
+    public synchronized void deleteRole(Long roleId) {
         requireRole(roleId);
         roles.remove(roleId);
     }

@@ -6,6 +6,8 @@ import com.uscbinp.domain.service.system.impl.SysUserServiceImpl;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.AbstractList;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +22,15 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class SysUserServiceImplTest {
+
+    @Test
+    void readMethodsShouldBeSynchronizedForAtomicComposition() throws Exception {
+        Method listUsers = SysUserServiceImpl.class.getMethod("listUsers", int.class, int.class);
+        Method getUser = SysUserServiceImpl.class.getMethod("getUser", Long.class);
+
+        assertTrue(Modifier.isSynchronized(listUsers.getModifiers()));
+        assertTrue(Modifier.isSynchronized(getUser.getModifiers()));
+    }
 
     @Test
     void createUserShouldRejectDuplicateUsername() {
