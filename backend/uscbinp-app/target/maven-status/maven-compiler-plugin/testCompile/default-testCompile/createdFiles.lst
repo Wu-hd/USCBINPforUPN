@@ -1,0 +1,4 @@
+com\uscbinp\app\SecurityAndInfraSmokeTest.class
+com\uscbinp\app\Task1AcceptanceTest.class
+com\uscbinp\app\ExceptionContractTest.class
+com\uscbinp\app\ContextLoadTest.class

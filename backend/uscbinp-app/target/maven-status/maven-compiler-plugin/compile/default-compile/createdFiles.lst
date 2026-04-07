@@ -1,0 +1,4 @@
+com\uscbinp\app\controller\DemoController.class
+com\uscbinp\app\controller\dto\DemoRequest.class
+com\uscbinp\app\UscbinpApplication.class
+com\uscbinp\app\controller\HealthController.class
