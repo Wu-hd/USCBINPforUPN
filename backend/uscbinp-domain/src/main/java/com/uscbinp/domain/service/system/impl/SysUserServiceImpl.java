@@ -4,7 +4,7 @@ import com.uscbinp.common.error.ErrorCode;
 import com.uscbinp.common.exception.BusinessException;
 import com.uscbinp.domain.service.system.SysRoleService;
 import com.uscbinp.domain.service.system.SysUserService;
-import com.uscbinp.domain.service.system.UserRoleConsistencyLock;
+import com.uscbinp.domain.service.system.SystemModelLock;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -22,14 +22,14 @@ public class SysUserServiceImpl implements SysUserService {
     private static final int DEFAULT_PAGE_SIZE = 10;
 
     private final SysRoleService sysRoleService;
-    private final UserRoleConsistencyLock userRoleConsistencyLock;
+    private final SystemModelLock systemModelLock;
     private final Map<Long, UserState> users = new ConcurrentHashMap<>();
     private final Map<Long, List<Long>> userRoleBindings = new ConcurrentHashMap<>();
     private final AtomicLong userIdSequence = new AtomicLong(100L);
 
-    public SysUserServiceImpl(SysRoleService sysRoleService, UserRoleConsistencyLock userRoleConsistencyLock) {
+    public SysUserServiceImpl(SysRoleService sysRoleService, SystemModelLock systemModelLock) {
         this.sysRoleService = sysRoleService;
-        this.userRoleConsistencyLock = userRoleConsistencyLock;
+        this.systemModelLock = systemModelLock;
         users.put(1L, new UserState(1L, "admin", "管理员", "13800000001", "admin@uscbinp.com", 1));
         users.put(2L, new UserState(2L, "demo", "演示用户", "13800000002", "demo@uscbinp.com", 1));
         userRoleBindings.put(1L, List.of(1L));
@@ -38,7 +38,7 @@ public class SysUserServiceImpl implements SysUserService {
 
     @Override
     public UserPageResult listUsers(int pageNum, int pageSize) {
-        synchronized (userRoleConsistencyLock.monitor()) {
+        return systemModelLock.withWriteLock(() -> {
             int resolvedPageNum = pageNum > 0 ? pageNum : DEFAULT_PAGE_NUM;
             int resolvedPageSize = pageSize > 0 ? pageSize : DEFAULT_PAGE_SIZE;
             List<UserState> orderedUsers = users.values()
@@ -52,19 +52,17 @@ public class SysUserServiceImpl implements SysUserService {
                 .map(this::toItem)
                 .toList();
             return new UserPageResult(new PageInfo(resolvedPageNum, resolvedPageSize, orderedUsers.size()), list);
-        }
+        });
     }
 
     @Override
     public UserItem getUser(Long userId) {
-        synchronized (userRoleConsistencyLock.monitor()) {
-            return toItem(requireUser(userId));
-        }
+        return systemModelLock.withWriteLock(() -> toItem(requireUser(userId)));
     }
 
     @Override
     public UserItem createUser(UserUpsertCommand command) {
-        synchronized (userRoleConsistencyLock.monitor()) {
+        return systemModelLock.withWriteLock(() -> {
             Long userId = userIdSequence.incrementAndGet();
             String username = resolveUsername(command.username(), userId);
             ensureUsernameUnique(username, null);
@@ -78,12 +76,12 @@ public class SysUserServiceImpl implements SysUserService {
             );
             users.put(userId, user);
             return toItem(user);
-        }
+        });
     }
 
     @Override
     public UserItem updateUser(Long userId, UserUpsertCommand command) {
-        synchronized (userRoleConsistencyLock.monitor()) {
+        return systemModelLock.withWriteLock(() -> {
             UserState existing = requireUser(userId);
             String username = resolveUsername(command.username(), existing.id());
             ensureUsernameUnique(username, existing.id());
@@ -97,21 +95,21 @@ public class SysUserServiceImpl implements SysUserService {
             );
             users.put(userId, updated);
             return toItem(updated);
-        }
+        });
     }
 
     @Override
     public void deleteUser(Long userId) {
-        synchronized (userRoleConsistencyLock.monitor()) {
+        systemModelLock.withWriteLock(() -> {
             requireUser(userId);
             users.remove(userId);
             userRoleBindings.remove(userId);
-        }
+        });
     }
 
     @Override
     public UserRoleBindingResult bindRoles(Long userId, List<Long> roleIds) {
-        synchronized (userRoleConsistencyLock.monitor()) {
+        return systemModelLock.withWriteLock(() -> {
             requireUser(userId);
             List<Long> normalizedRoleIds = roleIds == null
                 ? List.of()
@@ -122,7 +120,7 @@ public class SysUserServiceImpl implements SysUserService {
             normalizedRoleIds.forEach(this::requireRole);
             userRoleBindings.put(userId, List.copyOf(normalizedRoleIds));
             return new UserRoleBindingResult(userId, normalizedRoleIds);
-        }
+        });
     }
 
     private UserState requireUser(Long userId) {

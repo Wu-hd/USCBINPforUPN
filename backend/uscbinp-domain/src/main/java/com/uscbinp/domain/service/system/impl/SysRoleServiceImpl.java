@@ -3,7 +3,7 @@ package com.uscbinp.domain.service.system.impl;
 import com.uscbinp.common.error.ErrorCode;
 import com.uscbinp.common.exception.BusinessException;
 import com.uscbinp.domain.service.system.SysRoleService;
-import com.uscbinp.domain.service.system.UserRoleConsistencyLock;
+import com.uscbinp.domain.service.system.SystemModelLock;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -19,19 +19,19 @@ public class SysRoleServiceImpl implements SysRoleService {
     private static final int DEFAULT_PAGE_NUM = 1;
     private static final int DEFAULT_PAGE_SIZE = 10;
 
-    private final UserRoleConsistencyLock userRoleConsistencyLock;
+    private final SystemModelLock systemModelLock;
     private final Map<Long, RoleState> roles = new ConcurrentHashMap<>();
     private final AtomicLong roleIdSequence = new AtomicLong(100L);
 
-    public SysRoleServiceImpl(UserRoleConsistencyLock userRoleConsistencyLock) {
-        this.userRoleConsistencyLock = userRoleConsistencyLock;
+    public SysRoleServiceImpl(SystemModelLock systemModelLock) {
+        this.systemModelLock = systemModelLock;
         roles.put(1L, new RoleState(1L, "sys_admin", "系统管理员", 1));
         roles.put(2L, new RoleState(2L, "ops_user", "运维用户", 1));
     }
 
     @Override
     public RolePageResult listRoles(int pageNum, int pageSize) {
-        synchronized (userRoleConsistencyLock.monitor()) {
+        return systemModelLock.withReadLock(() -> {
             int resolvedPageNum = pageNum > 0 ? pageNum : DEFAULT_PAGE_NUM;
             int resolvedPageSize = pageSize > 0 ? pageSize : DEFAULT_PAGE_SIZE;
             List<RoleState> orderedRoles = roles.values()
@@ -45,19 +45,17 @@ public class SysRoleServiceImpl implements SysRoleService {
                 .map(this::toItem)
                 .toList();
             return new RolePageResult(new PageInfo(resolvedPageNum, resolvedPageSize, orderedRoles.size()), list);
-        }
+        });
     }
 
     @Override
     public RoleItem getRole(Long roleId) {
-        synchronized (userRoleConsistencyLock.monitor()) {
-            return toItem(requireRole(roleId));
-        }
+        return systemModelLock.withReadLock(() -> toItem(requireRole(roleId)));
     }
 
     @Override
     public RoleItem createRole(RoleUpsertCommand command) {
-        synchronized (userRoleConsistencyLock.monitor()) {
+        return systemModelLock.withWriteLock(() -> {
             Long roleId = roleIdSequence.incrementAndGet();
             String roleCode = resolveRoleCode(command.roleCode(), roleId);
             ensureRoleCodeUnique(roleCode, null);
@@ -69,12 +67,12 @@ public class SysRoleServiceImpl implements SysRoleService {
             );
             roles.put(roleId, role);
             return toItem(role);
-        }
+        });
     }
 
     @Override
     public RoleItem updateRole(Long roleId, RoleUpsertCommand command) {
-        synchronized (userRoleConsistencyLock.monitor()) {
+        return systemModelLock.withWriteLock(() -> {
             requireRole(roleId);
             String roleCode = resolveRoleCode(command.roleCode(), roleId);
             ensureRoleCodeUnique(roleCode, roleId);
@@ -86,15 +84,15 @@ public class SysRoleServiceImpl implements SysRoleService {
             );
             roles.put(roleId, role);
             return toItem(role);
-        }
+        });
     }
 
     @Override
     public void deleteRole(Long roleId) {
-        synchronized (userRoleConsistencyLock.monitor()) {
+        systemModelLock.withWriteLock(() -> {
             requireRole(roleId);
             roles.remove(roleId);
-        }
+        });
     }
 
     private RoleState requireRole(Long roleId) {

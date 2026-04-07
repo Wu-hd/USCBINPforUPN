@@ -18,6 +18,7 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -74,7 +75,7 @@ class SysUserServiceImplTest {
 
     @Test
     void deletedRolesShouldBeFilteredFromUserReadModel() {
-        UserRoleConsistencyLock lock = new UserRoleConsistencyLock();
+        SystemModelLock lock = new SystemModelLock();
         SysRoleService roleService = new SysRoleServiceImpl(lock);
         SysUserServiceImpl service = new SysUserServiceImpl(roleService, lock);
         SysRoleService.RoleItem temporaryRole = roleService.createRole(
@@ -89,40 +90,47 @@ class SysUserServiceImplTest {
     }
 
     @Test
-    void deletedRoleIdsShouldNotBeExposedDuringConcurrentReadAndDelete() throws Exception {
-        UserRoleConsistencyLock lock = new UserRoleConsistencyLock();
-        CoordinatedDeleteRoleService roleService = new CoordinatedDeleteRoleService(lock);
+    void deletedRoleShouldNotBreakConcurrentBindConsistency() throws Exception {
+        SystemModelLock lock = new SystemModelLock();
+        SysRoleServiceImpl roleService = new SysRoleServiceImpl(lock);
         SysUserServiceImpl service = new SysUserServiceImpl(roleService, lock);
         SysRoleService.RoleItem temporaryRole = roleService.createRole(
             new SysRoleService.RoleUpsertCommand("temp_role_" + System.nanoTime(), "临时角色", 1));
-        service.bindRoles(1L, List.of(1L, temporaryRole.id()));
+        CountDownLatch streamStarted = new CountDownLatch(1);
+        List<Long> slowRoleIds = new SlowRoleIdList(List.of(1L, temporaryRole.id(), 1L, temporaryRole.id()), streamStarted);
 
-        AtomicReference<SysUserService.UserItem> readUser = new AtomicReference<>();
-        AtomicReference<Throwable> readFailure = new AtomicReference<>();
-        Thread deleteThread = new Thread(() -> roleService.deleteRole(temporaryRole.id()), "delete-role-thread");
-        deleteThread.start();
-        assertTrue(roleService.awaitDeleteHoldingLock(2, TimeUnit.SECONDS), "delete thread should hold shared lock");
-
-        Thread readThread = new Thread(() -> {
+        AtomicReference<Throwable> bindFailure = new AtomicReference<>();
+        AtomicReference<Throwable> deleteFailure = new AtomicReference<>();
+        Thread bindThread = new Thread(() -> {
             try {
-                readUser.set(service.getUser(1L));
+                service.bindRoles(1L, slowRoleIds);
             } catch (Throwable throwable) {
-                readFailure.set(throwable);
+                bindFailure.set(throwable);
             }
-        }, "read-user-thread");
-        readThread.start();
-        roleService.releaseDelete();
+        }, "bind-role-thread");
+        bindThread.start();
+        assertTrue(streamStarted.await(2, TimeUnit.SECONDS), "bind thread should start role normalization");
 
+        Thread deleteThread = new Thread(() -> {
+            try {
+                roleService.deleteRole(temporaryRole.id());
+            } catch (Throwable throwable) {
+                deleteFailure.set(throwable);
+            }
+        }, "delete-role-thread");
+        deleteThread.start();
+
+        bindThread.join(3000);
         deleteThread.join(3000);
-        readThread.join(3000);
+        assertFalse(bindThread.isAlive(), "bind thread should finish");
         assertFalse(deleteThread.isAlive(), "delete thread should finish");
-        assertFalse(readThread.isAlive(), "read thread should finish");
-        assertEquals(null, readFailure.get());
-        assertEquals(List.of(1L), readUser.get().roleIds());
+        assertNull(bindFailure.get(), "bind should succeed even when delete runs concurrently");
+        assertNull(deleteFailure.get(), "delete should succeed");
+        assertEquals(List.of(1L), service.getUser(1L).roleIds());
     }
 
     private SysUserServiceImpl newService() {
-        UserRoleConsistencyLock lock = new UserRoleConsistencyLock();
+        SystemModelLock lock = new SystemModelLock();
         return new SysUserServiceImpl(new SysRoleServiceImpl(lock), lock);
     }
 
@@ -163,43 +171,4 @@ class SysUserServiceImplTest {
         }
     }
 
-    private static final class CoordinatedDeleteRoleService extends SysRoleServiceImpl {
-
-        private final UserRoleConsistencyLock lock;
-        private final CountDownLatch deleteHoldingLock = new CountDownLatch(1);
-        private final CountDownLatch releaseDelete = new CountDownLatch(1);
-
-        private CoordinatedDeleteRoleService(UserRoleConsistencyLock lock) {
-            super(lock);
-            this.lock = lock;
-        }
-
-        @Override
-        public void deleteRole(Long roleId) {
-            synchronized (lock.monitor()) {
-                deleteHoldingLock.countDown();
-                awaitRelease();
-                super.deleteRole(roleId);
-            }
-        }
-
-        private boolean awaitDeleteHoldingLock(long timeout, TimeUnit unit) throws InterruptedException {
-            return deleteHoldingLock.await(timeout, unit);
-        }
-
-        private void releaseDelete() {
-            releaseDelete.countDown();
-        }
-
-        private void awaitRelease() {
-            try {
-                if (!releaseDelete.await(2, TimeUnit.SECONDS)) {
-                    throw new IllegalStateException("delete release timeout");
-                }
-            } catch (InterruptedException ex) {
-                Thread.currentThread().interrupt();
-                throw new IllegalStateException("delete thread interrupted", ex);
-            }
-        }
-    }
 }
