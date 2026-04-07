@@ -49,11 +49,13 @@ public class SysRoleServiceImpl implements SysRoleService {
     }
 
     @Override
-    public RoleItem createRole(RoleUpsertCommand command) {
+    public synchronized RoleItem createRole(RoleUpsertCommand command) {
         Long roleId = roleIdSequence.incrementAndGet();
+        String roleCode = resolveRoleCode(command.roleCode(), roleId);
+        ensureRoleCodeUnique(roleCode, null);
         RoleState role = new RoleState(
             roleId,
-            resolveRoleCode(command.roleCode(), roleId),
+            roleCode,
             resolveRoleName(command.roleName(), roleId),
             resolveRoleStatus(command.roleStatus())
         );
@@ -62,11 +64,13 @@ public class SysRoleServiceImpl implements SysRoleService {
     }
 
     @Override
-    public RoleItem updateRole(Long roleId, RoleUpsertCommand command) {
+    public synchronized RoleItem updateRole(Long roleId, RoleUpsertCommand command) {
         requireRole(roleId);
+        String roleCode = resolveRoleCode(command.roleCode(), roleId);
+        ensureRoleCodeUnique(roleCode, roleId);
         RoleState role = new RoleState(
             roleId,
-            resolveRoleCode(command.roleCode(), roleId),
+            roleCode,
             resolveRoleName(command.roleName(), roleId),
             resolveRoleStatus(command.roleStatus())
         );
@@ -108,6 +112,15 @@ public class SysRoleServiceImpl implements SysRoleService {
 
     private Integer resolveRoleStatus(Integer roleStatus) {
         return roleStatus == null ? 1 : roleStatus;
+    }
+
+    private void ensureRoleCodeUnique(String roleCode, Long currentRoleId) {
+        boolean duplicated = roles.values()
+            .stream()
+            .anyMatch(role -> role.roleCode().equals(roleCode) && !role.id().equals(currentRoleId));
+        if (duplicated) {
+            throw new BusinessException(ErrorCode.BUSINESS_ERROR.getCode(), "角色编码已存在:" + roleCode);
+        }
     }
 
     private record RoleState(Long id, String roleCode, String roleName, Integer roleStatus) {

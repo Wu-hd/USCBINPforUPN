@@ -53,11 +53,13 @@ public class SysUserServiceImpl implements SysUserService {
     }
 
     @Override
-    public UserItem createUser(UserUpsertCommand command) {
+    public synchronized UserItem createUser(UserUpsertCommand command) {
         Long userId = userIdSequence.incrementAndGet();
+        String username = resolveUsername(command.username(), userId);
+        ensureUsernameUnique(username, null);
         UserState user = new UserState(
             userId,
-            resolveUsername(command.username(), userId),
+            username,
             command.realName(),
             command.mobile(),
             command.email(),
@@ -68,11 +70,13 @@ public class SysUserServiceImpl implements SysUserService {
     }
 
     @Override
-    public UserItem updateUser(Long userId, UserUpsertCommand command) {
+    public synchronized UserItem updateUser(Long userId, UserUpsertCommand command) {
         UserState existing = requireUser(userId);
+        String username = resolveUsername(command.username(), existing.id());
+        ensureUsernameUnique(username, existing.id());
         UserState updated = new UserState(
             existing.id(),
-            resolveUsername(command.username(), existing.id()),
+            username,
             command.realName(),
             command.mobile(),
             command.email(),
@@ -83,14 +87,14 @@ public class SysUserServiceImpl implements SysUserService {
     }
 
     @Override
-    public void deleteUser(Long userId) {
+    public synchronized void deleteUser(Long userId) {
         requireUser(userId);
         users.remove(userId);
         userRoleBindings.remove(userId);
     }
 
     @Override
-    public UserRoleBindingResult bindRoles(Long userId, List<Long> roleIds) {
+    public synchronized UserRoleBindingResult bindRoles(Long userId, List<Long> roleIds) {
         requireUser(userId);
         List<Long> normalizedRoleIds = roleIds == null
             ? List.of()
@@ -131,6 +135,15 @@ public class SysUserServiceImpl implements SysUserService {
 
     private Integer resolveAccountStatus(Integer accountStatus) {
         return accountStatus == null ? 1 : accountStatus;
+    }
+
+    private void ensureUsernameUnique(String username, Long currentUserId) {
+        boolean duplicated = users.values()
+            .stream()
+            .anyMatch(user -> user.username().equals(username) && !user.id().equals(currentUserId));
+        if (duplicated) {
+            throw new BusinessException(ErrorCode.BUSINESS_ERROR.getCode(), "用户名已存在:" + username);
+        }
     }
 
     private record UserState(Long id,
