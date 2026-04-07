@@ -1,5 +1,5 @@
-CREATE TABLE sys_user (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+CREATE TABLE IF NOT EXISTS sys_user (
+    id BIGINT PRIMARY KEY,
     username VARCHAR(64) NOT NULL,
     password VARCHAR(255) NOT NULL,
     created_by BIGINT,
@@ -9,8 +9,8 @@ CREATE TABLE sys_user (
     is_deleted TINYINT NOT NULL DEFAULT 0
 );
 
-CREATE TABLE sys_role (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+CREATE TABLE IF NOT EXISTS sys_role (
+    id BIGINT PRIMARY KEY,
     role_code VARCHAR(64) NOT NULL,
     role_name VARCHAR(128) NOT NULL,
     created_by BIGINT,
@@ -20,8 +20,8 @@ CREATE TABLE sys_role (
     is_deleted TINYINT NOT NULL DEFAULT 0
 );
 
-CREATE TABLE sys_user_role (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+CREATE TABLE IF NOT EXISTS sys_user_role (
+    id BIGINT PRIMARY KEY,
     user_id BIGINT NOT NULL,
     role_id BIGINT NOT NULL,
     created_by BIGINT,
@@ -31,10 +31,10 @@ CREATE TABLE sys_user_role (
     is_deleted TINYINT NOT NULL DEFAULT 0
 );
 
-CREATE TABLE sys_role_menu (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+CREATE TABLE IF NOT EXISTS sys_role_menu (
+    id BIGINT PRIMARY KEY,
     role_id BIGINT NOT NULL,
-    menu_id BIGINT NOT NULL,
+    menu_code VARCHAR(64) NOT NULL,
     created_by BIGINT,
     created_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_by BIGINT,
