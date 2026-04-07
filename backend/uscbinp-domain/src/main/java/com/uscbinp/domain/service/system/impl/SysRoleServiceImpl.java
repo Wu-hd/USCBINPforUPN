@@ -27,7 +27,7 @@ public class SysRoleServiceImpl implements SysRoleService {
     }
 
     @Override
-    public RolePageResult listRoles(int pageNum, int pageSize) {
+    public synchronized RolePageResult listRoles(int pageNum, int pageSize) {
         int resolvedPageNum = pageNum > 0 ? pageNum : DEFAULT_PAGE_NUM;
         int resolvedPageSize = pageSize > 0 ? pageSize : DEFAULT_PAGE_SIZE;
         List<RoleState> orderedRoles = roles.values()
@@ -44,7 +44,7 @@ public class SysRoleServiceImpl implements SysRoleService {
     }
 
     @Override
-    public RoleItem getRole(Long roleId) {
+    public synchronized RoleItem getRole(Long roleId) {
         return toItem(requireRole(roleId));
     }
 

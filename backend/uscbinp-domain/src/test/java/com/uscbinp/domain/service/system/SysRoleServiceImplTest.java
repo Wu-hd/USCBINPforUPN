@@ -15,6 +15,20 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class SysRoleServiceImplTest {
 
     @Test
+    void listRolesShouldBeSynchronizedForConsistencyWithMutations() throws Exception {
+        Method listRoles = SysRoleServiceImpl.class.getMethod("listRoles", int.class, int.class);
+
+        assertTrue(Modifier.isSynchronized(listRoles.getModifiers()));
+    }
+
+    @Test
+    void getRoleShouldBeSynchronizedForConsistencyWithMutations() throws Exception {
+        Method getRole = SysRoleServiceImpl.class.getMethod("getRole", Long.class);
+
+        assertTrue(Modifier.isSynchronized(getRole.getModifiers()));
+    }
+
+    @Test
     void deleteRoleShouldBeSynchronizedForConsistencyWithMutations() throws Exception {
         Method deleteRole = SysRoleServiceImpl.class.getMethod("deleteRole", Long.class);
 
