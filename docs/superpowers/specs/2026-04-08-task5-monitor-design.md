@@ -8,12 +8,13 @@
 - Task 3：权限与系统基座；
 - Task 4：资产与设备档案能力，已沉淀 `iot_device`/`iot_measure_point` 基础数据。
 
-本 spec 聚焦 Task 5，目标是交付一期“可演示、可联调”的实时监测最小闭环：
+本 spec 聚焦 Task 5，目标是交付一期“可演示、可联调”的实时监测与告警联动闭环：
 
 1. 提供模拟网关数据上报接口；
 2. 上报数据写入历史表，并对当前值表执行 UPSERT；
 3. 提供当前值与历史曲线查询接口；
-4. 通过 WebSocket + STOMP 广播实时状态更新消息（含异常标记）。
+4. 通过 WebSocket + STOMP 广播实时状态更新消息（含异常标记）；
+5. 异常值触发 `ops_alert_event` 事件落库，为 Task 6 提供告警输入。
 
 ---
 
@@ -24,31 +25,32 @@
 - `POST /api/monitor/ingest`：接收监测上报数据；
 - 历史写入：`ts_measure_history` 追加插入；
 - 当前值刷新：`ts_measure_current` 按 `point_id` 执行 UPSERT；
+- 异常联动：当值越过测点阈值时写入 `ops_alert_event`（最小事件模型）；
 - 查询接口：
   - `GET /api/monitor/current`（按点位/设备查询当前值）
   - `GET /api/monitor/history`（按点位 + 时间区间查询历史曲线）
 - WebSocket/STOMP 推送：
   - 广播点位实时更新消息；
-  - 当值越过测点阈值时标记异常并广播异常状态。
+  - 当值越过测点阈值时广播异常状态与事件摘要。
 
 ### 2.2 Out of Scope
 
 - MQTT/Kafka 等真实网关协议接入（本期仅 HTTP 模拟）；
-- 告警事件正式落库（`ops_alert_event`）与闭环处置；
 - 复杂流式计算、窗口聚合、规则编排后台；
+- 告警确认、关闭与工单联动处置（由 Task 6 完成）；
 - 前端大屏实现细节（本期仅提供后端接口与推送契约）。
 
 ---
 
 ## 3. 方案比较与选择
 
-### 方案 A：轻量闭环（推荐）
+### 方案 A：轻量闭环
 
 - 路径：HTTP 上报 -> history 插入 -> current UPSERT -> STOMP 广播。
 - 优点：实现成本低、联调快，满足一期实时演示目标。
 - 缺点：告警仅做状态标记，不形成正式事件流。
 
-### 方案 B：监测 + 告警联动
+### 方案 B：监测 + 告警联动（推荐）
 
 - 在方案 A 基础上直接写入 `ops_alert_event`。
 - 优点：更接近业务闭环。
@@ -60,7 +62,7 @@
 - 优点：实现最简单。
 - 缺点：无法支撑“实时监测”核心体验，不满足任务目标。
 
-**结论：采用方案 A。**
+**结论：采用方案 B。**
 
 ---
 
@@ -72,10 +74,11 @@
   - 数据接收、查询接口；
   - 参数校验、统一响应封装。
 - **domain（Service）**
-  - 上报处理编排（历史写入 + 当前值刷新 + 阈值判断）；
+  - 上报处理编排（历史写入 + 当前值刷新 + 阈值判断 + 告警事件生成）；
   - 查询聚合（当前值、历史曲线）。
 - **infra（Mapper + WebSocket）**
   - MyBatis-Plus 持久化；
+  - 告警事件 Mapper 写入；
   - STOMP 消息广播。
 
 ### 4.2 数据处理链路
@@ -85,7 +88,8 @@
 3. 写 `ts_measure_history`（append-only）；
 4. 对 `ts_measure_current` 执行 UPSERT（同 `point_id` 覆盖）；
 5. 计算 `alarmFlag`（超阈值为 1，否则 0）；
-6. 推送 STOMP 消息给订阅端。
+6. `alarmFlag=1` 时生成 `ops_alert_event`（最小字段集）；
+7. 推送 STOMP 消息给订阅端（携带事件摘要）。
 
 ### 4.3 WebSocket 广播约定
 
@@ -94,7 +98,7 @@
   - `/topic/monitor/points/{pointId}`（单点位）
   - `/topic/monitor/stream`（全量流）
 - 消息结构：
-  - `pointId`、`metricType`、`currentValue`、`collectTime`、`qualityFlag`、`alarmFlag`、`traceId`。
+  - `pointId`、`metricType`、`currentValue`、`collectTime`、`qualityFlag`、`alarmFlag`、`traceId`、`alertCode`（可空）。
 
 ---
 
@@ -121,6 +125,8 @@
   - `queryHistory(HistoryQuery)`：历史曲线查询。
 - `MonitorThresholdEvaluator`
   - 根据 `thresholdMin/thresholdMax` 计算 `alarmFlag`。
+- `MonitorAlertEventService`
+  - `emitIfNeeded(AlertEmitCommand)`：在异常时写入 `ops_alert_event`。
 
 ### 5.3 关键规则
 
@@ -128,6 +134,8 @@
 - `metricType` 与测点配置不一致时拒绝上报；
 - `collectTime` 允许客户端传入，未传则使用服务端当前时间；
 - `ts_measure_current` 以 `point_id` 为唯一键执行“存在更新、不存在插入”；
+- `alarmFlag=1` 时写 `ops_alert_event`，最小落库字段：`alert_code`、`target_type`、`target_id`、`point_id`、`alert_level`、`alert_status`、`occur_time`；
+- 同点位短时间重复异常可按最小去重窗口合并（默认 1 分钟）；
 - `history` 默认返回最近 `N` 条（建议默认 500，上限 5000）。
 
 ---
@@ -138,11 +146,13 @@
 - `iot_measure_point`（阈值、点位状态、指标类型）；
 - `ts_measure_history`（历史序列）；
 - `ts_measure_current`（实时快照）。
+- `ops_alert_event`（异常联动事件）。
 
 关键字段映射：
 - `metricValue -> ts_measure_history.metric_value`；
 - `metricValue -> ts_measure_current.current_value`；
 - 阈值判断结果 -> `alarm_flag`；
+- 异常联动 -> `ops_alert_event.alert_status=1(待处理)`；
 - 原始负载摘要 -> `raw_payload`（JSON 字符串）。
 
 ---
@@ -167,20 +177,22 @@
 - `MonitorIngestApiContractTest`
   - 合法上报返回成功；
   - 非法点位返回业务错误；
-  - 上报后可在 current 接口查询到最新值。
+  - 上报后可在 current 接口查询到最新值；
+  - 异常值上报后存在告警事件记录。
 - `MonitorQueryApiContractTest`
   - 历史曲线按时间排序；
   - 时间区间与 limit 生效。
 - `MonitorWebSocketContractTest`
   - 上报后能收到 STOMP 推送；
-  - 异常值推送 `alarmFlag=1`。
+  - 异常值推送 `alarmFlag=1` 且带 `alertCode`。
 
 ### 8.2 领域与基础设施测试
 
 - `MonitorIngestServiceTest`
   - history 追加写入；
   - current UPSERT 生效；
-  - 阈值判断正确。
+  - 阈值判断正确；
+  - 异常时告警事件写入正确。
 - `MonitorQueryServiceTest`
   - 当前值分页与历史区间过滤正确。
 
@@ -191,8 +203,9 @@
 1. 上报接口可用，能写入 history 并刷新 current；
 2. 相同 `point_id` 连续上报时，current 保持最新值；
 3. current/history 查询接口可支撑实时卡片与历史曲线；
-4. STOMP 能广播实时更新，异常值携带 `alarmFlag=1`；
-5. 新增测试通过，且不破坏既有测试。
+4. 异常上报可写入 `ops_alert_event`，并输出最小事件摘要；
+5. STOMP 能广播实时更新，异常值携带 `alarmFlag=1` 与 `alertCode`；
+6. 新增测试通过，且不破坏既有测试。
 
 ---
 
@@ -201,11 +214,11 @@
 - 风险：HTTP 模拟上报与真实网关时序特性可能存在偏差；
 - 缓解：通过 `MeasureIngestCommand` 保持协议字段稳定，后续适配器扩展；
 - 与后续任务衔接：
-  - Task 6 可复用 `alarmFlag` 与 `traceId` 生成正式告警事件；
+  - Task 6 直接复用 Task 5 生成的 `ops_alert_event` 做确认/关闭/工单流转；
   - 前端趋势图与实时卡片可直接消费 current/history + STOMP 契约。
 
 ---
 
 ## 11. 默认决策说明
 
-本轮在用户离线场景下，按“最小可交付”原则选择方案 A：优先交付监测数据链路与实时广播，不提前耦合告警事件落库，确保 Task 5 与 Task 6 边界清晰、实现风险可控。
+根据用户评审反馈，本轮改为方案 B：在实时监测链路中前置落地“异常即事件”的最小告警联动，保证 Task 5 产出可直接驱动 Task 6 的处置闭环。
