@@ -1,10 +1,13 @@
 package com.uscbinp.app.controller.asset;
 
 import com.uscbinp.common.api.ApiResponse;
+import com.uscbinp.common.error.ErrorCode;
+import com.uscbinp.common.exception.BusinessException;
 import com.uscbinp.domain.service.asset.AssetPipeSectionService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.security.core.Authentication;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -55,11 +58,13 @@ public class AssetPipeSectionController {
                                                                 @RequestParam(required = false) Long networkId,
                                                                 @RequestParam(required = false) String regionCode,
                                                                 Authentication authentication) {
+        String resolvedRegionCode = resolveRegionCode(authentication, regionCode);
+        requireReadableRegion(authentication, resolvedRegionCode);
         return ApiResponse.ok(assetPipeSectionService.list(
             pageNum,
             pageSize,
             networkId,
-            resolveRegionCode(authentication, regionCode),
+            resolvedRegionCode,
             isAdmin(authentication)
         ));
     }
@@ -90,6 +95,12 @@ public class AssetPipeSectionController {
             return "3302";
         }
         return requestRegionCode;
+    }
+
+    private void requireReadableRegion(Authentication authentication, String resolvedRegionCode) {
+        if (!isAdmin(authentication) && !StringUtils.hasText(resolvedRegionCode)) {
+            throw new BusinessException(ErrorCode.AUTH_FORBIDDEN.getCode(), ErrorCode.AUTH_FORBIDDEN.getMessage());
+        }
     }
 
     private record PipeSectionSaveRequest(String sectionCode,

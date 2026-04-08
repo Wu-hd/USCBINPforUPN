@@ -1,5 +1,7 @@
 package com.uscbinp.app;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -7,6 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -16,46 +19,51 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @WithMockUser(username = "admin")
-class AssetApiContractTest {
+class DeviceApiContractTest {
 
     @Autowired
     MockMvc mockMvc;
 
+    @Autowired
+    ObjectMapper objectMapper;
+
     @Test
-    void createNetworkThenListShouldReturnUnifiedResponse() throws Exception {
-        mockMvc.perform(post("/api/asset/networks")
+    void createDeviceThenListShouldReturnUnifiedResponse() throws Exception {
+        MvcResult created = mockMvc.perform(post("/api/device/devices")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                     {
-                      "networkName": "主干管网",
-                      "networkType": "MAIN",
-                      "regionCode": "3301",
-                      "serviceStatus": 1
+                      "deviceName": "压力采集器",
+                      "deviceType": "PRESSURE_SENSOR",
+                      "regionCode": "3301"
                     }
                     """))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.code").value("00000"))
-            .andExpect(jsonPath("$.data.networkCode").isString())
-            .andExpect(jsonPath("$.data.networkName").value("主干管网"));
+            .andExpect(jsonPath("$.data.deviceCode").isString())
+            .andReturn();
 
-        mockMvc.perform(get("/api/asset/networks")
+        JsonNode node = objectMapper.readTree(created.getResponse().getContentAsString());
+        long deviceId = node.path("data").path("id").asLong();
+
+        mockMvc.perform(get("/api/device/measure-points")
                 .param("pageNum", "1")
                 .param("pageSize", "10")
+                .param("deviceId", String.valueOf(deviceId))
                 .param("regionCode", "3301"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.code").value("00000"))
-            .andExpect(jsonPath("$.data.page.pageNum").value(1))
-            .andExpect(jsonPath("$.data.list[0].networkName").value("主干管网"));
+            .andExpect(jsonPath("$.code").value("00000"));
     }
 
     @Test
-    void createPipeSectionWithMissingNetworkShouldReturnBusinessError() throws Exception {
-        mockMvc.perform(post("/api/asset/pipe-sections")
+    void createPointWithMissingDeviceShouldReturnBusinessError() throws Exception {
+        mockMvc.perform(post("/api/device/measure-points")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                     {
-                      "sectionName": "管段A",
-                      "networkId": 999,
+                      "pointName": "压力测点A",
+                      "deviceId": 999,
+                      "metricType": "PRESSURE",
                       "regionCode": "3301"
                     }
                     """))
@@ -66,7 +74,7 @@ class AssetApiContractTest {
     @Test
     @WithMockUser(username = "viewer")
     void nonAdminListWithoutRegionShouldBeForbidden() throws Exception {
-        mockMvc.perform(get("/api/asset/networks")
+        mockMvc.perform(get("/api/device/devices")
                 .param("pageNum", "1")
                 .param("pageSize", "10"))
             .andExpect(status().isOk())
