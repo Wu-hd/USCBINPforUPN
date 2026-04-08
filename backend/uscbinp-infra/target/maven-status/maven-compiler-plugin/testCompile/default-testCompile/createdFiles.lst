@@ -1,1 +1,4 @@
+com\uscbinp\infra\schema\SqlResourceLoader.class
+com\uscbinp\infra\schema\AuthSchemaSqlContractTest.class
+com\uscbinp\infra\mapper\MapperContractTest.class
 com\uscbinp\infra\config\MybatisPlusConfigTest.class

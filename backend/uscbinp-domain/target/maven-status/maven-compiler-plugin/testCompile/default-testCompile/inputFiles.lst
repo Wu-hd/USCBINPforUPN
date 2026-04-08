@@ -1,1 +1,14 @@
+E:\Whd\USCBINPforUPN\backend\uscbinp-domain\src\test\java\com\uscbinp\domain\model\entity\EntityMappingContractTest.java
 E:\Whd\USCBINPforUPN\backend\uscbinp-domain\src\test\java\com\uscbinp\domain\model\SampleEntityTest.java
+E:\Whd\USCBINPforUPN\backend\uscbinp-domain\src\test\java\com\uscbinp\domain\service\asset\AssetPipeSectionServiceTest.java
+E:\Whd\USCBINPforUPN\backend\uscbinp-domain\src\test\java\com\uscbinp\domain\service\auth\AuthServiceTest.java
+E:\Whd\USCBINPforUPN\backend\uscbinp-domain\src\test\java\com\uscbinp\domain\service\code\BizCodeServiceTest.java
+E:\Whd\USCBINPforUPN\backend\uscbinp-domain\src\test\java\com\uscbinp\domain\service\device\IotMeasurePointServiceTest.java
+E:\Whd\USCBINPforUPN\backend\uscbinp-domain\src\test\java\com\uscbinp\domain\service\monitor\MonitorAlertLinkageTest.java
+E:\Whd\USCBINPforUPN\backend\uscbinp-domain\src\test\java\com\uscbinp\domain\service\monitor\MonitorIngestServiceTest.java
+E:\Whd\USCBINPforUPN\backend\uscbinp-domain\src\test\java\com\uscbinp\domain\service\monitor\MonitorQueryServiceTest.java
+E:\Whd\USCBINPforUPN\backend\uscbinp-domain\src\test\java\com\uscbinp\domain\service\system\permission\RoleRegionDataPermissionEvaluatorTest.java
+E:\Whd\USCBINPforUPN\backend\uscbinp-domain\src\test\java\com\uscbinp\domain\service\system\SysRoleServiceImplTest.java
+E:\Whd\USCBINPforUPN\backend\uscbinp-domain\src\test\java\com\uscbinp\domain\service\system\SysUserServiceImplTest.java
+E:\Whd\USCBINPforUPN\backend\uscbinp-domain\src\test\java\com\uscbinp\domain\service\workorder\AlertWorkOrderLinkageTest.java
+E:\Whd\USCBINPforUPN\backend\uscbinp-domain\src\test\java\com\uscbinp\domain\service\workorder\WorkOrderFlowServiceTest.java

@@ -1,4 +1,14 @@
-com\uscbinp\app\SecurityAndInfraSmokeTest.class
-com\uscbinp\app\Task1AcceptanceTest.class
-com\uscbinp\app\ExceptionContractTest.class
+com\uscbinp\app\AssetApiContractTest.class
+com\uscbinp\app\DeviceApiContractTest.class
+com\uscbinp\app\MonitorWebSocketContractTest.class
 com\uscbinp\app\ContextLoadTest.class
+com\uscbinp\app\ExceptionContractTest.class
+com\uscbinp\app\AuthApiContractTest.class
+com\uscbinp\app\WorkOrderApiContractTest.class
+com\uscbinp\app\AuthSecurityContractTest.class
+com\uscbinp\app\Task1AcceptanceTest.class
+com\uscbinp\app\SystemUserRoleApiContractTest.class
+com\uscbinp\app\MonitorQueryApiContractTest.class
+com\uscbinp\app\SecurityAndInfraSmokeTest.class
+com\uscbinp\app\AlertEventApiContractTest.class
+com\uscbinp\app\MonitorIngestApiContractTest.class

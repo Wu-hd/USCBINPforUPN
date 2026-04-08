@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="com.uscbinp.app.SystemUserRoleApiContractTest" time="5.665" tests="6" errors="0" skipped="0" failures="0">
+  <properties>
+    <property name="java.specification.version" value="17"/>
+    <property name="sun.cpu.isalist" value="amd64"/>
+    <property name="sun.jnu.encoding" value="GBK"/>
+    <property name="java.class.path" value="E:\Whd\USCBINPforUPN\backend\uscbinp-app\target\test-classes;E:\Whd\USCBINPforUPN\backend\uscbinp-app\target\classes;E:\Whd\USCBINPforUPN\backend\uscbinp-common\target\classes;E:\Whd\USCBINPforUPN\backend\uscbinp-domain\target\classes;E:\apache-maven-3.9.11\repository\com\baomidou\mybatis-plus-annotation\3.5.7\mybatis-plus-annotation-3.5.7.jar;E:\apache-maven-3.9.11\repository\org\springframework\security\spring-security-crypto\6.3.3\spring-security-crypto-6.3.3.jar;E:\Whd\USCBINPforUPN\backend\uscbinp-infra\target\classes;E:\apache-maven-3.9.11\repository\com\baomidou\mybatis-plus-spring-boot3-starter\3.5.7\mybatis-plus-spring-boot3-starter-3.5.7.jar;E:\apache-maven-3.9.11\repository\com\baomidou\mybatis-plus\3.5.7\mybatis-plus-3.5.7.jar;E:\apache-maven-3.9.11\repository\com\baomidou\mybatis-plus-core\3.5.7\mybatis-plus-core-3.5.7.jar;E:\apache-maven-3.9.11\repository\com\baomidou\mybatis-plus-extension\3.5.7\mybatis-plus-extension-3.5.7.jar;E:\apache-maven-3.9.11\repository\org\mybatis\mybatis\3.5.16\mybatis-3.5.16.jar;E:\apache-maven-3.9.11\repository\com\github\jsqlparser\jsqlparser\4.9\jsqlparser-4.9.jar;E:\apache-maven-3.9.11\repository\org\mybatis\mybatis-spring\3.0.3\mybatis-spring-3.0.3.jar;E:\apache-maven-3.9.11\repository\com\baomidou\mybatis-plus-spring-boot-autoconfigure\3.5.7\mybatis-plus-spring-boot-autoconfigure-3.5.7.jar;E:\apache-maven-3.9.11\repository\org\springframework\boot\spring-boot-autoconfigure\3.3.4\spring-boot-autoconfigure-3.3.4.jar;E:\apache-maven-3.9.11\repository\org\springframework\boot\spring-boot-starter-jdbc\3.3.4\spring-boot-starter-jdbc-3.3.4.jar;E:\apache-maven-3.9.11\repository\com\zaxxer\HikariCP\5.1.0\HikariCP-5.1.0.jar;E:\apache-maven-3.9.11\repository\org\springframework\spring-jdbc\6.1.13\spring-jdbc-6.1.13.jar;E:\apache-maven-3.9.11\repository\org\springframework\boot\spring-boot-starter-data-redis\3.3.4\spring-boot-starter-data-redis-3.3.4.jar;E:\apache-maven-3.9.11\repository\io\lettuce\lettuce-core\6.3.2.RELEASE\lettuce-core-6.3.2.RELEASE.jar;E:\apache-maven-3.9.11\repository\io\netty\netty-common\4.1.113.Final\netty-common-4.1.113.Final.jar;E:\apache-maven-3.9.11\repository\io\netty\netty-handler\4.1.113.Final\netty-handler-4.1.113.Final.jar;E:\apache-maven-3.9.11\repository\io\netty\netty-resolver\4.1.113.Final\netty-resolver-4.1.113.Final.jar;E:\apache-maven-3.9.11\repository\io\netty\netty-buffer\4.1.113.Final\netty-buffer-4.1.113.Final.jar;E:\apache-maven-3.9.11\repository\io\netty\netty-transport-native-unix-common\4.1.113.Final\netty-transport-native-unix-common-4.1.113.Final.jar;E:\apache-maven-3.9.11\repository\io\netty\netty-codec\4.1.113.Final\netty-codec-4.1.113.Final.jar;E:\apache-maven-3.9.11\repository\io\netty\netty-transport\4.1.113.Final\netty-transport-4.1.113.Final.jar;E:\apache-maven-3.9.11\repository\io\projectreactor\reactor-core\3.6.10\reactor-core-3.6.10.jar;E:\apache-maven-3.9.11\repository\org\reactivestreams\reactive-streams\1.0.4\reactive-streams-1.0.4.jar;E:\apache-maven-3.9.11\repository\org\springframework\data\spring-data-redis\3.3.4\spring-data-redis-3.3.4.jar;E:\apache-maven-3.9.11\repository\org\springframework\data\spring-data-keyvalue\3.3.4\spring-data-keyvalue-3.3.4.jar;E:\apache-maven-3.9.11\repository\org\springframework\data\spring-data-commons\3.3.4\spring-data-commons-3.3.4.jar;E:\apache-maven-3.9.11\repository\org\springframework\spring-tx\6.1.13\spring-tx-6.1.13.jar;E:\apache-maven-3.9.11\repository\org\springframework\spring-oxm\6.1.13\spring-oxm-6.1.13.jar;E:\apache-maven-3.9.11\repository\org\springframework\spring-context-support\6.1.13\spring-context-support-6.1.13.jar;E:\apache-maven-3.9.11\repository\org\springframework\boot\spring-boot-starter-websocket\3.3.4\spring-boot-starter-websocket-3.3.4.jar;E:\apache-maven-3.9.11\repository\org\springframework\spring-messaging\6.1.13\spring-messaging-6.1.13.jar;E:\apache-maven-3.9.11\repository\org\springframework\spring-websocket\6.1.13\spring-websocket-6.1.13.jar;E:\apache-maven-3.9.11\repository\io\jsonwebtoken\jjwt-api\0.12.6\jjwt-api-0.12.6.jar;E:\apache-maven-3.9.11\repository\io\jsonwebtoken\jjwt-impl\0.12.6\jjwt-impl-0.12.6.jar;E:\apache-maven-3.9.11\repository\io\jsonwebtoken\jjwt-jackson\0.12.6\jjwt-jackson-0.12.6.jar;E:\apache-maven-3.9.11\repository\com\fasterxml\jackson\core\jackson-databind\2.17.2\jackson-databind-2.17.2.jar;E:\apache-maven-3.9.11\repository\com\fasterxml\jackson\core\jackson-annotations\2.17.2\jackson-annotations-2.17.2.jar;E:\apache-maven-3.9.11\repository\com\fasterxml\jackson\core\jackson-core\2.17.2\jackson-core-2.17.2.jar;E:\apache-maven-3.9.11\repository\org\mapstruct\mapstruct\1.5.5.Final\mapstruct-1.5.5.Final.jar;E:\apache-maven-3.9.11\repository\org\springframework\boot\spring-boot-starter-web\3.3.4\spring-boot-starter-web-3.3.4.jar;E:\apache-maven-3.9.11\repository\org\springframework\boot\spring-boot-starter\3.3.4\spring-boot-starter-3.3.4.jar;E:\apache-maven-3.9.11\repository\org\springframework\boot\spring-boot\3.3.4\spring-boot-3.3.4.jar;E:\apache-maven-3.9.11\repository\org\springframework\boot\spring-boot-starter-logging\3.3.4\spring-boot-starter-logging-3.3.4.jar;E:\apache-maven-3.9.11\repository\ch\qos\logback\logback-classic\1.5.8\logback-classic-1.5.8.jar;E:\apache-maven-3.9.11\repository\ch\qos\logback\logback-core\1.5.8\logback-core-1.5.8.jar;E:\apache-maven-3.9.11\repository\org\apache\logging\log4j\log4j-to-slf4j\2.23.1\log4j-to-slf4j-2.23.1.jar;E:\apache-maven-3.9.11\repository\org\apache\logging\log4j\log4j-api\2.23.1\log4j-api-2.23.1.jar;E:\apache-maven-3.9.11\repository\org\slf4j\jul-to-slf4j\2.0.16\jul-to-slf4j-2.0.16.jar;E:\apache-maven-3.9.11\repository\jakarta\annotation\jakarta.annotation-api\2.1.1\jakarta.annotation-api-2.1.1.jar;E:\apache-maven-3.9.11\repository\org\yaml\snakeyaml\2.2\snakeyaml-2.2.jar;E:\apache-maven-3.9.11\repository\org\springframework\boot\spring-boot-starter-json\3.3.4\spring-boot-starter-json-3.3.4.jar;E:\apache-maven-3.9.11\repository\com\fasterxml\jackson\datatype\jackson-datatype-jdk8\2.17.2\jackson-datatype-jdk8-2.17.2.jar;E:\apache-maven-3.9.11\repository\com\fasterxml\jackson\datatype\jackson-datatype-jsr310\2.17.2\jackson-datatype-jsr310-2.17.2.jar;E:\apache-maven-3.9.11\repository\com\fasterxml\jackson\module\jackson-module-parameter-names\2.17.2\jackson-module-parameter-names-2.17.2.jar;E:\apache-maven-3.9.11\repository\org\springframework\boot\spring-boot-starter-tomcat\3.3.4\spring-boot-starter-tomcat-3.3.4.jar;E:\apache-maven-3.9.11\repository\org\apache\tomcat\embed\tomcat-embed-core\10.1.30\tomcat-embed-core-10.1.30.jar;E:\apache-maven-3.9.11\repository\org\apache\tomcat\embed\tomcat-embed-websocket\10.1.30\tomcat-embed-websocket-10.1.30.jar;E:\apache-maven-3.9.11\repository\org\springframework\spring-web\6.1.13\spring-web-6.1.13.jar;E:\apache-maven-3.9.11\repository\org\springframework\spring-beans\6.1.13\spring-beans-6.1.13.jar;E:\apache-maven-3.9.11\repository\io\micrometer\micrometer-observation\1.13.4\micrometer-observation-1.13.4.jar;E:\apache-maven-3.9.11\repository\io\micrometer\micrometer-commons\1.13.4\micrometer-commons-1.13.4.jar;E:\apache-maven-3.9.11\repository\org\springframework\spring-webmvc\6.1.13\spring-webmvc-6.1.13.jar;E:\apache-maven-3.9.11\repository\org\springframework\spring-context\6.1.13\spring-context-6.1.13.jar;E:\apache-maven-3.9.11\repository\org\springframework\spring-expression\6.1.13\spring-expression-6.1.13.jar;E:\apache-maven-3.9.11\repository\org\springframework\boot\spring-boot-starter-validation\3.3.4\spring-boot-starter-validation-3.3.4.jar;E:\apache-maven-3.9.11\repository\org\apache\tomcat\embed\tomcat-embed-el\10.1.30\tomcat-embed-el-10.1.30.jar;E:\apache-maven-3.9.11\repository\org\hibernate\validator\hibernate-validator\8.0.1.Final\hibernate-validator-8.0.1.Final.jar;E:\apache-maven-3.9.11\repository\jakarta\validation\jakarta.validation-api\3.0.2\jakarta.validation-api-3.0.2.jar;E:\apache-maven-3.9.11\repository\org\jboss\logging\jboss-logging\3.5.3.Final\jboss-logging-3.5.3.Final.jar;E:\apache-maven-3.9.11\repository\com\fasterxml\classmate\1.7.0\classmate-1.7.0.jar;E:\apache-maven-3.9.11\repository\org\springframework\boot\spring-boot-starter-security\3.3.4\spring-boot-starter-security-3.3.4.jar;E:\apache-maven-3.9.11\repository\org\springframework\spring-aop\6.1.13\spring-aop-6.1.13.jar;E:\apache-maven-3.9.11\repository\org\springframework\security\spring-security-config\6.3.3\spring-security-config-6.3.3.jar;E:\apache-maven-3.9.11\repository\org\springframework\security\spring-security-web\6.3.3\spring-security-web-6.3.3.jar;E:\apache-maven-3.9.11\repository\org\springframework\boot\spring-boot-starter-test\3.3.4\spring-boot-starter-test-3.3.4.jar;E:\apache-maven-3.9.11\repository\org\springframework\boot\spring-boot-test\3.3.4\spring-boot-test-3.3.4.jar;E:\apache-maven-3.9.11\repository\org\springframework\boot\spring-boot-test-autoconfigure\3.3.4\spring-boot-test-autoconfigure-3.3.4.jar;E:\apache-maven-3.9.11\repository\com\jayway\jsonpath\json-path\2.9.0\json-path-2.9.0.jar;E:\apache-maven-3.9.11\repository\org\slf4j\slf4j-api\2.0.16\slf4j-api-2.0.16.jar;E:\apache-maven-3.9.11\repository\jakarta\xml\bind\jakarta.xml.bind-api\4.0.2\jakarta.xml.bind-api-4.0.2.jar;E:\apache-maven-3.9.11\repository\jakarta\activation\jakarta.activation-api\2.1.3\jakarta.activation-api-2.1.3.jar;E:\apache-maven-3.9.11\repository\net\minidev\json-smart\2.5.1\json-smart-2.5.1.jar;E:\apache-maven-3.9.11\repository\net\minidev\accessors-smart\2.5.1\accessors-smart-2.5.1.jar;E:\apache-maven-3.9.11\repository\org\ow2\asm\asm\9.6\asm-9.6.jar;E:\apache-maven-3.9.11\repository\org\assertj\assertj-core\3.25.3\assertj-core-3.25.3.jar;E:\apache-maven-3.9.11\repository\net\bytebuddy\byte-buddy\1.14.19\byte-buddy-1.14.19.jar;E:\apache-maven-3.9.11\repository\org\awaitility\awaitility\4.2.2\awaitility-4.2.2.jar;E:\apache-maven-3.9.11\repository\org\hamcrest\hamcrest\2.2\hamcrest-2.2.jar;E:\apache-maven-3.9.11\repository\org\junit\jupiter\junit-jupiter\5.10.3\junit-jupiter-5.10.3.jar;E:\apache-maven-3.9.11\repository\org\junit\jupiter\junit-jupiter-api\5.10.3\junit-jupiter-api-5.10.3.jar;E:\apache-maven-3.9.11\repository\org\opentest4j\opentest4j\1.3.0\opentest4j-1.3.0.jar;E:\apache-maven-3.9.11\repository\org\junit\platform\junit-platform-commons\1.10.3\junit-platform-commons-1.10.3.jar;E:\apache-maven-3.9.11\repository\org\apiguardian\apiguardian-api\1.1.2\apiguardian-api-1.1.2.jar;E:\apache-maven-3.9.11\repository\org\junit\jupiter\junit-jupiter-params\5.10.3\junit-jupiter-params-5.10.3.jar;E:\apache-maven-3.9.11\repository\org\junit\jupiter\junit-jupiter-engine\5.10.3\junit-jupiter-engine-5.10.3.jar;E:\apache-maven-3.9.11\repository\org\junit\platform\junit-platform-engine\1.10.3\junit-platform-engine-1.10.3.jar;E:\apache-maven-3.9.11\repository\org\mockito\mockito-core\5.11.0\mockito-core-5.11.0.jar;E:\apache-maven-3.9.11\repository\net\bytebuddy\byte-buddy-agent\1.14.19\byte-buddy-agent-1.14.19.jar;E:\apache-maven-3.9.11\repository\org\objenesis\objenesis\3.3\objenesis-3.3.jar;E:\apache-maven-3.9.11\repository\org\mockito\mockito-junit-jupiter\5.11.0\mockito-junit-jupiter-5.11.0.jar;E:\apache-maven-3.9.11\repository\org\skyscreamer\jsonassert\1.5.3\jsonassert-1.5.3.jar;E:\apache-maven-3.9.11\repository\com\vaadin\external\google\android-json\0.0.20131108.vaadin1\android-json-0.0.20131108.vaadin1.jar;E:\apache-maven-3.9.11\repository\org\springframework\spring-core\6.1.13\spring-core-6.1.13.jar;E:\apache-maven-3.9.11\repository\org\springframework\spring-jcl\6.1.13\spring-jcl-6.1.13.jar;E:\apache-maven-3.9.11\repository\org\springframework\spring-test\6.1.13\spring-test-6.1.13.jar;E:\apache-maven-3.9.11\repository\org\xmlunit\xmlunit-core\2.9.1\xmlunit-core-2.9.1.jar;E:\apache-maven-3.9.11\repository\org\springframework\security\spring-security-test\6.3.3\spring-security-test-6.3.3.jar;E:\apache-maven-3.9.11\repository\org\springframework\security\spring-security-core\6.3.3\spring-security-core-6.3.3.jar;"/>
+    <property name="java.vm.vendor" value="Oracle Corporation"/>
+    <property name="sun.arch.data.model" value="64"/>
+    <property name="user.variant" value=""/>
+    <property name="java.vendor.url" value="https://java.oracle.com/"/>
+    <property name="user.timezone" value="Asia/Shanghai"/>
+    <property name="org.jboss.logging.provider" value="slf4j"/>
+    <property name="os.name" value="Windows 11"/>
+    <property name="java.vm.specification.version" value="17"/>
+    <property name="sun.java.launcher" value="SUN_STANDARD"/>
+    <property name="user.country" value="CN"/>
+    <property name="sun.boot.library.path" value="C:\Program Files\Java\jdk-17\bin"/>
+    <property name="sun.java.command" value="C:\Users\w1328\AppData\Local\Temp\surefire3699036519520814005\surefirebooter-20260408154016108_12.jar C:\Users\w1328\AppData\Local\Temp\surefire3699036519520814005 2026-04-08T15-39-50_505-jvmRun1 surefire-20260408154016108_10tmp surefire_3-20260408154016108_11tmp"/>
+    <property name="jdk.debug" value="release"/>
+    <property name="surefire.test.class.path" value="E:\Whd\USCBINPforUPN\backend\uscbinp-app\target\test-classes;E:\Whd\USCBINPforUPN\backend\uscbinp-app\target\classes;E:\Whd\USCBINPforUPN\backend\uscbinp-common\target\classes;E:\Whd\USCBINPforUPN\backend\uscbinp-domain\target\classes;E:\apache-maven-3.9.11\repository\com\baomidou\mybatis-plus-annotation\3.5.7\mybatis-plus-annotation-3.5.7.jar;E:\apache-maven-3.9.11\repository\org\springframework\security\spring-security-crypto\6.3.3\spring-security-crypto-6.3.3.jar;E:\Whd\USCBINPforUPN\backend\uscbinp-infra\target\classes;E:\apache-maven-3.9.11\repository\com\baomidou\mybatis-plus-spring-boot3-starter\3.5.7\mybatis-plus-spring-boot3-starter-3.5.7.jar;E:\apache-maven-3.9.11\repository\com\baomidou\mybatis-plus\3.5.7\mybatis-plus-3.5.7.jar;E:\apache-maven-3.9.11\repository\com\baomidou\mybatis-plus-core\3.5.7\mybatis-plus-core-3.5.7.jar;E:\apache-maven-3.9.11\repository\com\baomidou\mybatis-plus-extension\3.5.7\mybatis-plus-extension-3.5.7.jar;E:\apache-maven-3.9.11\repository\org\mybatis\mybatis\3.5.16\mybatis-3.5.16.jar;E:\apache-maven-3.9.11\repository\com\github\jsqlparser\jsqlparser\4.9\jsqlparser-4.9.jar;E:\apache-maven-3.9.11\repository\org\mybatis\mybatis-spring\3.0.3\mybatis-spring-3.0.3.jar;E:\apache-maven-3.9.11\repository\com\baomidou\mybatis-plus-spring-boot-autoconfigure\3.5.7\mybatis-plus-spring-boot-autoconfigure-3.5.7.jar;E:\apache-maven-3.9.11\repository\org\springframework\boot\spring-boot-autoconfigure\3.3.4\spring-boot-autoconfigure-3.3.4.jar;E:\apache-maven-3.9.11\repository\org\springframework\boot\spring-boot-starter-jdbc\3.3.4\spring-boot-starter-jdbc-3.3.4.jar;E:\apache-maven-3.9.11\repository\com\zaxxer\HikariCP\5.1.0\HikariCP-5.1.0.jar;E:\apache-maven-3.9.11\repository\org\springframework\spring-jdbc\6.1.13\spring-jdbc-6.1.13.jar;E:\apache-maven-3.9.11\repository\org\springframework\boot\spring-boot-starter-data-redis\3.3.4\spring-boot-starter-data-redis-3.3.4.jar;E:\apache-maven-3.9.11\repository\io\lettuce\lettuce-core\6.3.2.RELEASE\lettuce-core-6.3.2.RELEASE.jar;E:\apache-maven-3.9.11\repository\io\netty\netty-common\4.1.113.Final\netty-common-4.1.113.Final.jar;E:\apache-maven-3.9.11\repository\io\netty\netty-handler\4.1.113.Final\netty-handler-4.1.113.Final.jar;E:\apache-maven-3.9.11\repository\io\netty\netty-resolver\4.1.113.Final\netty-resolver-4.1.113.Final.jar;E:\apache-maven-3.9.11\repository\io\netty\netty-buffer\4.1.113.Final\netty-buffer-4.1.113.Final.jar;E:\apache-maven-3.9.11\repository\io\netty\netty-transport-native-unix-common\4.1.113.Final\netty-transport-native-unix-common-4.1.113.Final.jar;E:\apache-maven-3.9.11\repository\io\netty\netty-codec\4.1.113.Final\netty-codec-4.1.113.Final.jar;E:\apache-maven-3.9.11\repository\io\netty\netty-transport\4.1.113.Final\netty-transport-4.1.113.Final.jar;E:\apache-maven-3.9.11\repository\io\projectreactor\reactor-core\3.6.10\reactor-core-3.6.10.jar;E:\apache-maven-3.9.11\repository\org\reactivestreams\reactive-streams\1.0.4\reactive-streams-1.0.4.jar;E:\apache-maven-3.9.11\repository\org\springframework\data\spring-data-redis\3.3.4\spring-data-redis-3.3.4.jar;E:\apache-maven-3.9.11\repository\org\springframework\data\spring-data-keyvalue\3.3.4\spring-data-keyvalue-3.3.4.jar;E:\apache-maven-3.9.11\repository\org\springframework\data\spring-data-commons\3.3.4\spring-data-commons-3.3.4.jar;E:\apache-maven-3.9.11\repository\org\springframework\spring-tx\6.1.13\spring-tx-6.1.13.jar;E:\apache-maven-3.9.11\repository\org\springframework\spring-oxm\6.1.13\spring-oxm-6.1.13.jar;E:\apache-maven-3.9.11\repository\org\springframework\spring-context-support\6.1.13\spring-context-support-6.1.13.jar;E:\apache-maven-3.9.11\repository\org\springframework\boot\spring-boot-starter-websocket\3.3.4\spring-boot-starter-websocket-3.3.4.jar;E:\apache-maven-3.9.11\repository\org\springframework\spring-messaging\6.1.13\spring-messaging-6.1.13.jar;E:\apache-maven-3.9.11\repository\org\springframework\spring-websocket\6.1.13\spring-websocket-6.1.13.jar;E:\apache-maven-3.9.11\repository\io\jsonwebtoken\jjwt-api\0.12.6\jjwt-api-0.12.6.jar;E:\apache-maven-3.9.11\repository\io\jsonwebtoken\jjwt-impl\0.12.6\jjwt-impl-0.12.6.jar;E:\apache-maven-3.9.11\repository\io\jsonwebtoken\jjwt-jackson\0.12.6\jjwt-jackson-0.12.6.jar;E:\apache-maven-3.9.11\repository\com\fasterxml\jackson\core\jackson-databind\2.17.2\jackson-databind-2.17.2.jar;E:\apache-maven-3.9.11\repository\com\fasterxml\jackson\core\jackson-annotations\2.17.2\jackson-annotations-2.17.2.jar;E:\apache-maven-3.9.11\repository\com\fasterxml\jackson\core\jackson-core\2.17.2\jackson-core-2.17.2.jar;E:\apache-maven-3.9.11\repository\org\mapstruct\mapstruct\1.5.5.Final\mapstruct-1.5.5.Final.jar;E:\apache-maven-3.9.11\repository\org\springframework\boot\spring-boot-starter-web\3.3.4\spring-boot-starter-web-3.3.4.jar;E:\apache-maven-3.9.11\repository\org\springframework\boot\spring-boot-starter\3.3.4\spring-boot-starter-3.3.4.jar;E:\apache-maven-3.9.11\repository\org\springframework\boot\spring-boot\3.3.4\spring-boot-3.3.4.jar;E:\apache-maven-3.9.11\repository\org\springframework\boot\spring-boot-starter-logging\3.3.4\spring-boot-starter-logging-3.3.4.jar;E:\apache-maven-3.9.11\repository\ch\qos\logback\logback-classic\1.5.8\logback-classic-1.5.8.jar;E:\apache-maven-3.9.11\repository\ch\qos\logback\logback-core\1.5.8\logback-core-1.5.8.jar;E:\apache-maven-3.9.11\repository\org\apache\logging\log4j\log4j-to-slf4j\2.23.1\log4j-to-slf4j-2.23.1.jar;E:\apache-maven-3.9.11\repository\org\apache\logging\log4j\log4j-api\2.23.1\log4j-api-2.23.1.jar;E:\apache-maven-3.9.11\repository\org\slf4j\jul-to-slf4j\2.0.16\jul-to-slf4j-2.0.16.jar;E:\apache-maven-3.9.11\repository\jakarta\annotation\jakarta.annotation-api\2.1.1\jakarta.annotation-api-2.1.1.jar;E:\apache-maven-3.9.11\repository\org\yaml\snakeyaml\2.2\snakeyaml-2.2.jar;E:\apache-maven-3.9.11\repository\org\springframework\boot\spring-boot-starter-json\3.3.4\spring-boot-starter-json-3.3.4.jar;E:\apache-maven-3.9.11\repository\com\fasterxml\jackson\datatype\jackson-datatype-jdk8\2.17.2\jackson-datatype-jdk8-2.17.2.jar;E:\apache-maven-3.9.11\repository\com\fasterxml\jackson\datatype\jackson-datatype-jsr310\2.17.2\jackson-datatype-jsr310-2.17.2.jar;E:\apache-maven-3.9.11\repository\com\fasterxml\jackson\module\jackson-module-parameter-names\2.17.2\jackson-module-parameter-names-2.17.2.jar;E:\apache-maven-3.9.11\repository\org\springframework\boot\spring-boot-starter-tomcat\3.3.4\spring-boot-starter-tomcat-3.3.4.jar;E:\apache-maven-3.9.11\repository\org\apache\tomcat\embed\tomcat-embed-core\10.1.30\tomcat-embed-core-10.1.30.jar;E:\apache-maven-3.9.11\repository\org\apache\tomcat\embed\tomcat-embed-websocket\10.1.30\tomcat-embed-websocket-10.1.30.jar;E:\apache-maven-3.9.11\repository\org\springframework\spring-web\6.1.13\spring-web-6.1.13.jar;E:\apache-maven-3.9.11\repository\org\springframework\spring-beans\6.1.13\spring-beans-6.1.13.jar;E:\apache-maven-3.9.11\repository\io\micrometer\micrometer-observation\1.13.4\micrometer-observation-1.13.4.jar;E:\apache-maven-3.9.11\repository\io\micrometer\micrometer-commons\1.13.4\micrometer-commons-1.13.4.jar;E:\apache-maven-3.9.11\repository\org\springframework\spring-webmvc\6.1.13\spring-webmvc-6.1.13.jar;E:\apache-maven-3.9.11\repository\org\springframework\spring-context\6.1.13\spring-context-6.1.13.jar;E:\apache-maven-3.9.11\repository\org\springframework\spring-expression\6.1.13\spring-expression-6.1.13.jar;E:\apache-maven-3.9.11\repository\org\springframework\boot\spring-boot-starter-validation\3.3.4\spring-boot-starter-validation-3.3.4.jar;E:\apache-maven-3.9.11\repository\org\apache\tomcat\embed\tomcat-embed-el\10.1.30\tomcat-embed-el-10.1.30.jar;E:\apache-maven-3.9.11\repository\org\hibernate\validator\hibernate-validator\8.0.1.Final\hibernate-validator-8.0.1.Final.jar;E:\apache-maven-3.9.11\repository\jakarta\validation\jakarta.validation-api\3.0.2\jakarta.validation-api-3.0.2.jar;E:\apache-maven-3.9.11\repository\org\jboss\logging\jboss-logging\3.5.3.Final\jboss-logging-3.5.3.Final.jar;E:\apache-maven-3.9.11\repository\com\fasterxml\classmate\1.7.0\classmate-1.7.0.jar;E:\apache-maven-3.9.11\repository\org\springframework\boot\spring-boot-starter-security\3.3.4\spring-boot-starter-security-3.3.4.jar;E:\apache-maven-3.9.11\repository\org\springframework\spring-aop\6.1.13\spring-aop-6.1.13.jar;E:\apache-maven-3.9.11\repository\org\springframework\security\spring-security-config\6.3.3\spring-security-config-6.3.3.jar;E:\apache-maven-3.9.11\repository\org\springframework\security\spring-security-web\6.3.3\spring-security-web-6.3.3.jar;E:\apache-maven-3.9.11\repository\org\springframework\boot\spring-boot-starter-test\3.3.4\spring-boot-starter-test-3.3.4.jar;E:\apache-maven-3.9.11\repository\org\springframework\boot\spring-boot-test\3.3.4\spring-boot-test-3.3.4.jar;E:\apache-maven-3.9.11\repository\org\springframework\boot\spring-boot-test-autoconfigure\3.3.4\spring-boot-test-autoconfigure-3.3.4.jar;E:\apache-maven-3.9.11\repository\com\jayway\jsonpath\json-path\2.9.0\json-path-2.9.0.jar;E:\apache-maven-3.9.11\repository\org\slf4j\slf4j-api\2.0.16\slf4j-api-2.0.16.jar;E:\apache-maven-3.9.11\repository\jakarta\xml\bind\jakarta.xml.bind-api\4.0.2\jakarta.xml.bind-api-4.0.2.jar;E:\apache-maven-3.9.11\repository\jakarta\activation\jakarta.activation-api\2.1.3\jakarta.activation-api-2.1.3.jar;E:\apache-maven-3.9.11\repository\net\minidev\json-smart\2.5.1\json-smart-2.5.1.jar;E:\apache-maven-3.9.11\repository\net\minidev\accessors-smart\2.5.1\accessors-smart-2.5.1.jar;E:\apache-maven-3.9.11\repository\org\ow2\asm\asm\9.6\asm-9.6.jar;E:\apache-maven-3.9.11\repository\org\assertj\assertj-core\3.25.3\assertj-core-3.25.3.jar;E:\apache-maven-3.9.11\repository\net\bytebuddy\byte-buddy\1.14.19\byte-buddy-1.14.19.jar;E:\apache-maven-3.9.11\repository\org\awaitility\awaitility\4.2.2\awaitility-4.2.2.jar;E:\apache-maven-3.9.11\repository\org\hamcrest\hamcrest\2.2\hamcrest-2.2.jar;E:\apache-maven-3.9.11\repository\org\junit\jupiter\junit-jupiter\5.10.3\junit-jupiter-5.10.3.jar;E:\apache-maven-3.9.11\repository\org\junit\jupiter\junit-jupiter-api\5.10.3\junit-jupiter-api-5.10.3.jar;E:\apache-maven-3.9.11\repository\org\opentest4j\opentest4j\1.3.0\opentest4j-1.3.0.jar;E:\apache-maven-3.9.11\repository\org\junit\platform\junit-platform-commons\1.10.3\junit-platform-commons-1.10.3.jar;E:\apache-maven-3.9.11\repository\org\apiguardian\apiguardian-api\1.1.2\apiguardian-api-1.1.2.jar;E:\apache-maven-3.9.11\repository\org\junit\jupiter\junit-jupiter-params\5.10.3\junit-jupiter-params-5.10.3.jar;E:\apache-maven-3.9.11\repository\org\junit\jupiter\junit-jupiter-engine\5.10.3\junit-jupiter-engine-5.10.3.jar;E:\apache-maven-3.9.11\repository\org\junit\platform\junit-platform-engine\1.10.3\junit-platform-engine-1.10.3.jar;E:\apache-maven-3.9.11\repository\org\mockito\mockito-core\5.11.0\mockito-core-5.11.0.jar;E:\apache-maven-3.9.11\repository\net\bytebuddy\byte-buddy-agent\1.14.19\byte-buddy-agent-1.14.19.jar;E:\apache-maven-3.9.11\repository\org\objenesis\objenesis\3.3\objenesis-3.3.jar;E:\apache-maven-3.9.11\repository\org\mockito\mockito-junit-jupiter\5.11.0\mockito-junit-jupiter-5.11.0.jar;E:\apache-maven-3.9.11\repository\org\skyscreamer\jsonassert\1.5.3\jsonassert-1.5.3.jar;E:\apache-maven-3.9.11\repository\com\vaadin\external\google\android-json\0.0.20131108.vaadin1\android-json-0.0.20131108.vaadin1.jar;E:\apache-maven-3.9.11\repository\org\springframework\spring-core\6.1.13\spring-core-6.1.13.jar;E:\apache-maven-3.9.11\repository\org\springframework\spring-jcl\6.1.13\spring-jcl-6.1.13.jar;E:\apache-maven-3.9.11\repository\org\springframework\spring-test\6.1.13\spring-test-6.1.13.jar;E:\apache-maven-3.9.11\repository\org\xmlunit\xmlunit-core\2.9.1\xmlunit-core-2.9.1.jar;E:\apache-maven-3.9.11\repository\org\springframework\security\spring-security-test\6.3.3\spring-security-test-6.3.3.jar;E:\apache-maven-3.9.11\repository\org\springframework\security\spring-security-core\6.3.3\spring-security-core-6.3.3.jar;"/>
+    <property name="sun.cpu.endian" value="little"/>
+    <property name="user.home" value="C:\Users\w1328"/>
+    <property name="user.language" value="zh"/>
+    <property name="java.specification.vendor" value="Oracle Corporation"/>
+    <property name="java.version.date" value="2024-01-16"/>
+    <property name="java.home" value="C:\Program Files\Java\jdk-17"/>
+    <property name="file.separator" value="\"/>
+    <property name="basedir" value="E:\Whd\USCBINPforUPN\backend\uscbinp-app"/>
+    <property name="java.vm.compressedOopsMode" value="Zero based"/>
+    <property name="line.separator" value="&#10;"/>
+    <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
+    <property name="java.specification.name" value="Java Platform API Specification"/>
+    <property name="FILE_LOG_CHARSET" value="GBK"/>
+    <property name="java.awt.headless" value="true"/>
+    <property name="surefire.real.class.path" value="C:\Users\w1328\AppData\Local\Temp\surefire3699036519520814005\surefirebooter-20260408154016108_12.jar"/>
+    <property name="user.script" value=""/>
+    <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
+    <property name="java.runtime.version" value="17.0.10+11-LTS-240"/>
+    <property name="user.name" value="w1328"/>
+    <property name="path.separator" value=";"/>
+    <property name="os.version" value="10.0"/>
+    <property name="java.runtime.name" value="Java(TM) SE Runtime Environment"/>
+    <property name="file.encoding" value="GBK"/>
+    <property name="java.vm.name" value="Java HotSpot(TM) 64-Bit Server VM"/>
+    <property name="localRepository" value="E:\apache-maven-3.9.11\repository"/>
+    <property name="java.vendor.url.bug" value="https://bugreport.java.com/bugreport/"/>
+    <property name="java.io.tmpdir" value="C:\Users\w1328\AppData\Local\Temp\"/>
+    <property name="java.version" value="17.0.10"/>
+    <property name="user.dir" value="E:\Whd\USCBINPforUPN\backend\uscbinp-app"/>
+    <property name="os.arch" value="amd64"/>
+    <property name="java.vm.specification.name" value="Java Virtual Machine Specification"/>
+    <property name="PID" value="23580"/>
+    <property name="sun.os.patch.level" value=""/>
+    <property name="CONSOLE_LOG_CHARSET" value="GBK"/>
+    <property name="native.encoding" value="GBK"/>
+    <property name="java.library.path" value="C:\Program Files\Java\jdk-17\bin;C:\WINDOWS\Sun\Java\bin;C:\WINDOWS\system32;C:\WINDOWS;C:\Program Files\PowerShell\7;D:\Program Files\Microsoft MPI\Bin\;D:\SIMULIA\Commands;C:\Program Files\Common Files\Oracle\Java\javapath;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files (x86)\dotnet\;C:\Program Files (x86)\Atomsk;F:\Program Files\nodejs\;F:\Program Files\nodejs;F:\Program Files\nodejs\node_global;F:\Program Files\nodejs\node_cache;C:\Program Files\Java\jdk1.8.0_102\bin;F:\Git\cmd;E:\Program Files\MySQL\MySQL Server 9.5\bin;E:\apache-maven-3.9.11\bin;C:\Program Files\Java\jdk-17\bin;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\Docker\Docker\resources\bin;C:\Program Files\PowerShell\7\;C:\ProgramData\Microsoft\Windows\Start Menu\Programs\PowerShell;C:\Users\w1328\AppData\Local\pnpm;C:\Users\w1328\AppData\Local\Programs\Python\Python313\Scripts\;C:\Users\w1328\AppData\Local\Programs\Python\Python313\;C:\Users\w1328\AppData\Local\Microsoft\WindowsApps;D:\Users\w1328\AppData\Local\LAMMPS 64-bit 2Aug2023-MSMPI\bin;D:\Programs\Microsoft VS Code\bin;C:\Users\w1328\AppData\Local\Programs\cursor\resources\app\bin;C:\Users\w1328\AppData\Local\JetBrains\Toolbox\scripts;C:\Users\w1328\AppData\Local\Microsoft\WindowsApps;E:\Antigravity\bin;."/>
+    <property name="java.vm.info" value="mixed mode, sharing"/>
+    <property name="java.vendor" value="Oracle Corporation"/>
+    <property name="java.vm.version" value="17.0.10+11-LTS-240"/>
+    <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
+    <property name="java.class.version" value="61.0"/>
+  </properties>
+  <testcase name="bindRolesShouldAllowClearingAllBindings" classname="com.uscbinp.app.SystemUserRoleApiContractTest" time="0.165">
+    <system-out><![CDATA[2026-04-08T15:40:30.892+08:00  INFO 23580 --- [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [com.uscbinp.app.SystemUserRoleApiContractTest]: SystemUserRoleApiContractTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-04-08T15:40:30.897+08:00  INFO 23580 --- [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration com.uscbinp.app.UscbinpApplication for test class com.uscbinp.app.SystemUserRoleApiContractTest
+2026-04-08T15:40:30.947+08:00  INFO 23580 --- [           main] o.s.m.s.b.SimpleBrokerMessageHandler     : Stopping...
+2026-04-08T15:40:30.948+08:00  INFO 23580 --- [           main] o.s.m.s.b.SimpleBrokerMessageHandler     : BrokerAvailabilityEvent[available=false, SimpleBrokerMessageHandler [org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry@18e8eb59]]
+2026-04-08T15:40:30.948+08:00  INFO 23580 --- [           main] o.s.m.s.b.SimpleBrokerMessageHandler     : Stopped.
+]]></system-out>
+  </testcase>
+  <testcase name="bindRolesWithTokenShouldReturnUnifiedResponse" classname="com.uscbinp.app.SystemUserRoleApiContractTest" time="0.127">
+    <system-out><![CDATA[
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.3.4)
+
+2026-04-08T15:40:31.119+08:00  INFO 23580 --- [           main] c.u.app.SystemUserRoleApiContractTest    : Starting SystemUserRoleApiContractTest using Java 17.0.10 with PID 23580 (started by w1328 in E:\Whd\USCBINPforUPN\backend\uscbinp-app)
+2026-04-08T15:40:31.121+08:00  INFO 23580 --- [           main] c.u.app.SystemUserRoleApiContractTest    : No active profile set, falling back to 1 default profile: "default"
+2026-04-08T15:40:31.899+08:00  INFO 23580 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2026-04-08T15:40:31.900+08:00  INFO 23580 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2026-04-08T15:40:31.924+08:00  INFO 23580 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 24 ms. Found 0 Redis repository interfaces.
+2026-04-08T15:40:32.126+08:00  WARN 23580 --- [           main] .s.s.UserDetailsServiceAutoConfiguration : 
+
+Using generated security password: 8251b6ba-1e7d-4e97-b79c-7d691677ea5c
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-04-08T15:40:32.128+08:00  INFO 23580 --- [           main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name inMemoryUserDetailsManager
+2026-04-08T15:40:32.299+08:00  INFO 23580 --- [           main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-04-08T15:40:32.299+08:00  INFO 23580 --- [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-04-08T15:40:32.301+08:00  INFO 23580 --- [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 1 ms
+2026-04-08T15:40:32.309+08:00  INFO 23580 --- [           main] o.s.m.s.b.SimpleBrokerMessageHandler     : Starting...
+2026-04-08T15:40:32.309+08:00  INFO 23580 --- [           main] o.s.m.s.b.SimpleBrokerMessageHandler     : BrokerAvailabilityEvent[available=true, SimpleBrokerMessageHandler [org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry@522941b2]]
+2026-04-08T15:40:32.310+08:00  INFO 23580 --- [           main] o.s.m.s.b.SimpleBrokerMessageHandler     : Started.
+2026-04-08T15:40:32.314+08:00  INFO 23580 --- [           main] c.u.app.SystemUserRoleApiContractTest    : Started SystemUserRoleApiContractTest in 1.242 seconds (process running for 15.147)
+2026-04-08T15:40:32.351+08:00  INFO 23580 --- [           main] o.s.m.s.b.SimpleBrokerMessageHandler     : Stopping...
+2026-04-08T15:40:32.351+08:00  INFO 23580 --- [           main] o.s.m.s.b.SimpleBrokerMessageHandler     : BrokerAvailabilityEvent[available=false, SimpleBrokerMessageHandler [org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry@522941b2]]
+2026-04-08T15:40:32.351+08:00  INFO 23580 --- [           main] o.s.m.s.b.SimpleBrokerMessageHandler     : Stopped.
+]]></system-out>
+  </testcase>
+  <testcase name="deletingBoundRoleShouldBeRejectedAndRoleShouldDisappearAfterUnbind" classname="com.uscbinp.app.SystemUserRoleApiContractTest" time="0.106">
+    <system-out><![CDATA[
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.3.4)
+
+2026-04-08T15:40:32.480+08:00  INFO 23580 --- [           main] c.u.app.SystemUserRoleApiContractTest    : Starting SystemUserRoleApiContractTest using Java 17.0.10 with PID 23580 (started by w1328 in E:\Whd\USCBINPforUPN\backend\uscbinp-app)
+2026-04-08T15:40:32.481+08:00  INFO 23580 --- [           main] c.u.app.SystemUserRoleApiContractTest    : No active profile set, falling back to 1 default profile: "default"
+2026-04-08T15:40:33.183+08:00  INFO 23580 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2026-04-08T15:40:33.184+08:00  INFO 23580 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2026-04-08T15:40:33.209+08:00  INFO 23580 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 25 ms. Found 0 Redis repository interfaces.
+2026-04-08T15:40:33.367+08:00  WARN 23580 --- [           main] .s.s.UserDetailsServiceAutoConfiguration : 
+
+Using generated security password: de415ffe-1264-45c0-97fd-023e0ecd560e
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-04-08T15:40:33.368+08:00  INFO 23580 --- [           main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name inMemoryUserDetailsManager
+2026-04-08T15:40:33.569+08:00  INFO 23580 --- [           main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-04-08T15:40:33.570+08:00  INFO 23580 --- [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-04-08T15:40:33.571+08:00  INFO 23580 --- [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 1 ms
+2026-04-08T15:40:33.579+08:00  INFO 23580 --- [           main] o.s.m.s.b.SimpleBrokerMessageHandler     : Starting...
+2026-04-08T15:40:33.579+08:00  INFO 23580 --- [           main] o.s.m.s.b.SimpleBrokerMessageHandler     : BrokerAvailabilityEvent[available=true, SimpleBrokerMessageHandler [org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry@ef21eba]]
+2026-04-08T15:40:33.579+08:00  INFO 23580 --- [           main] o.s.m.s.b.SimpleBrokerMessageHandler     : Started.
+2026-04-08T15:40:33.583+08:00  INFO 23580 --- [           main] c.u.app.SystemUserRoleApiContractTest    : Started SystemUserRoleApiContractTest in 1.135 seconds (process running for 16.415)
+2026-04-08T15:40:33.644+08:00  INFO 23580 --- [           main] o.s.m.s.b.SimpleBrokerMessageHandler     : Stopping...
+2026-04-08T15:40:33.645+08:00  INFO 23580 --- [           main] o.s.m.s.b.SimpleBrokerMessageHandler     : BrokerAvailabilityEvent[available=false, SimpleBrokerMessageHandler [org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry@ef21eba]]
+2026-04-08T15:40:33.645+08:00  INFO 23580 --- [           main] o.s.m.s.b.SimpleBrokerMessageHandler     : Stopped.
+]]></system-out>
+  </testcase>
+  <testcase name="listUsersWithNonAdminTokenShouldBeRestrictedByRegion" classname="com.uscbinp.app.SystemUserRoleApiContractTest" time="0.195">
+    <system-out><![CDATA[
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.3.4)
+
+2026-04-08T15:40:33.730+08:00  INFO 23580 --- [           main] c.u.app.SystemUserRoleApiContractTest    : Starting SystemUserRoleApiContractTest using Java 17.0.10 with PID 23580 (started by w1328 in E:\Whd\USCBINPforUPN\backend\uscbinp-app)
+2026-04-08T15:40:33.730+08:00  INFO 23580 --- [           main] c.u.app.SystemUserRoleApiContractTest    : No active profile set, falling back to 1 default profile: "default"
+2026-04-08T15:40:34.167+08:00  INFO 23580 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2026-04-08T15:40:34.168+08:00  INFO 23580 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2026-04-08T15:40:34.198+08:00  INFO 23580 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 29 ms. Found 0 Redis repository interfaces.
+2026-04-08T15:40:34.355+08:00  WARN 23580 --- [           main] .s.s.UserDetailsServiceAutoConfiguration : 
+
+Using generated security password: 08f67509-5426-4e06-8a49-8e175aa01d5a
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-04-08T15:40:34.356+08:00  INFO 23580 --- [           main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name inMemoryUserDetailsManager
+2026-04-08T15:40:34.548+08:00  INFO 23580 --- [           main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-04-08T15:40:34.548+08:00  INFO 23580 --- [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-04-08T15:40:34.548+08:00  INFO 23580 --- [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 0 ms
+2026-04-08T15:40:34.556+08:00  INFO 23580 --- [           main] o.s.m.s.b.SimpleBrokerMessageHandler     : Starting...
+2026-04-08T15:40:34.556+08:00  INFO 23580 --- [           main] o.s.m.s.b.SimpleBrokerMessageHandler     : BrokerAvailabilityEvent[available=true, SimpleBrokerMessageHandler [org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry@7d99846f]]
+2026-04-08T15:40:34.556+08:00  INFO 23580 --- [           main] o.s.m.s.b.SimpleBrokerMessageHandler     : Started.
+2026-04-08T15:40:34.561+08:00  INFO 23580 --- [           main] c.u.app.SystemUserRoleApiContractTest    : Started SystemUserRoleApiContractTest in 0.866 seconds (process running for 17.394)
+2026-04-08T15:40:34.655+08:00  INFO 23580 --- [           main] o.s.m.s.b.SimpleBrokerMessageHandler     : Stopping...
+2026-04-08T15:40:34.655+08:00  INFO 23580 --- [           main] o.s.m.s.b.SimpleBrokerMessageHandler     : BrokerAvailabilityEvent[available=false, SimpleBrokerMessageHandler [org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry@7d99846f]]
+2026-04-08T15:40:34.656+08:00  INFO 23580 --- [           main] o.s.m.s.b.SimpleBrokerMessageHandler     : Stopped.
+]]></system-out>
+  </testcase>
+  <testcase name="listUsersWithTokenShouldReturnUnifiedPagedResponse" classname="com.uscbinp.app.SystemUserRoleApiContractTest" time="0.114">
+    <system-out><![CDATA[
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.3.4)
+
+2026-04-08T15:40:34.788+08:00  INFO 23580 --- [           main] c.u.app.SystemUserRoleApiContractTest    : Starting SystemUserRoleApiContractTest using Java 17.0.10 with PID 23580 (started by w1328 in E:\Whd\USCBINPforUPN\backend\uscbinp-app)
+2026-04-08T15:40:34.788+08:00  INFO 23580 --- [           main] c.u.app.SystemUserRoleApiContractTest    : No active profile set, falling back to 1 default profile: "default"
+2026-04-08T15:40:35.237+08:00  INFO 23580 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2026-04-08T15:40:35.238+08:00  INFO 23580 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2026-04-08T15:40:35.263+08:00  INFO 23580 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 25 ms. Found 0 Redis repository interfaces.
+2026-04-08T15:40:35.403+08:00  WARN 23580 --- [           main] .s.s.UserDetailsServiceAutoConfiguration : 
+
+Using generated security password: 742651d7-1334-42a3-aedb-5fcaae28b797
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-04-08T15:40:35.405+08:00  INFO 23580 --- [           main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name inMemoryUserDetailsManager
+2026-04-08T15:40:35.542+08:00  INFO 23580 --- [           main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-04-08T15:40:35.542+08:00  INFO 23580 --- [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-04-08T15:40:35.544+08:00  INFO 23580 --- [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 2 ms
+2026-04-08T15:40:35.552+08:00  INFO 23580 --- [           main] o.s.m.s.b.SimpleBrokerMessageHandler     : Starting...
+2026-04-08T15:40:35.553+08:00  INFO 23580 --- [           main] o.s.m.s.b.SimpleBrokerMessageHandler     : BrokerAvailabilityEvent[available=true, SimpleBrokerMessageHandler [org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry@2be71a78]]
+2026-04-08T15:40:35.553+08:00  INFO 23580 --- [           main] o.s.m.s.b.SimpleBrokerMessageHandler     : Started.
+2026-04-08T15:40:35.559+08:00  INFO 23580 --- [           main] c.u.app.SystemUserRoleApiContractTest    : Started SystemUserRoleApiContractTest in 0.797 seconds (process running for 18.391)
+2026-04-08T15:40:35.578+08:00  INFO 23580 --- [           main] o.s.m.s.b.SimpleBrokerMessageHandler     : Stopping...
+2026-04-08T15:40:35.578+08:00  INFO 23580 --- [           main] o.s.m.s.b.SimpleBrokerMessageHandler     : BrokerAvailabilityEvent[available=false, SimpleBrokerMessageHandler [org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry@2be71a78]]
+2026-04-08T15:40:35.578+08:00  INFO 23580 --- [           main] o.s.m.s.b.SimpleBrokerMessageHandler     : Stopped.
+]]></system-out>
+  </testcase>
+  <testcase name="bindRolesWithNonExistentRoleShouldReturnBusinessErrorCode" classname="com.uscbinp.app.SystemUserRoleApiContractTest" time="0.113">
+    <system-out><![CDATA[
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.3.4)
+
+2026-04-08T15:40:35.704+08:00  INFO 23580 --- [           main] c.u.app.SystemUserRoleApiContractTest    : Starting SystemUserRoleApiContractTest using Java 17.0.10 with PID 23580 (started by w1328 in E:\Whd\USCBINPforUPN\backend\uscbinp-app)
+2026-04-08T15:40:35.705+08:00  INFO 23580 --- [           main] c.u.app.SystemUserRoleApiContractTest    : No active profile set, falling back to 1 default profile: "default"
+2026-04-08T15:40:36.161+08:00  INFO 23580 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2026-04-08T15:40:36.161+08:00  INFO 23580 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2026-04-08T15:40:36.184+08:00  INFO 23580 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 23 ms. Found 0 Redis repository interfaces.
+2026-04-08T15:40:36.309+08:00  WARN 23580 --- [           main] .s.s.UserDetailsServiceAutoConfiguration : 
+
+Using generated security password: 5bbf4db7-6c25-41bc-ad3b-6230ba0e456c
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-04-08T15:40:36.311+08:00  INFO 23580 --- [           main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name inMemoryUserDetailsManager
+2026-04-08T15:40:36.429+08:00  INFO 23580 --- [           main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-04-08T15:40:36.430+08:00  INFO 23580 --- [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-04-08T15:40:36.430+08:00  INFO 23580 --- [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 0 ms
+2026-04-08T15:40:36.434+08:00  INFO 23580 --- [           main] o.s.m.s.b.SimpleBrokerMessageHandler     : Starting...
+2026-04-08T15:40:36.434+08:00  INFO 23580 --- [           main] o.s.m.s.b.SimpleBrokerMessageHandler     : BrokerAvailabilityEvent[available=true, SimpleBrokerMessageHandler [org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry@24d8cd8d]]
+2026-04-08T15:40:36.435+08:00  INFO 23580 --- [           main] o.s.m.s.b.SimpleBrokerMessageHandler     : Started.
+2026-04-08T15:40:36.438+08:00  INFO 23580 --- [           main] c.u.app.SystemUserRoleApiContractTest    : Started SystemUserRoleApiContractTest in 0.758 seconds (process running for 19.27)
+2026-04-08T15:40:36.459+08:00  INFO 23580 --- [           main] o.s.m.s.b.SimpleBrokerMessageHandler     : Stopping...
+2026-04-08T15:40:36.460+08:00  INFO 23580 --- [           main] o.s.m.s.b.SimpleBrokerMessageHandler     : BrokerAvailabilityEvent[available=false, SimpleBrokerMessageHandler [org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry@24d8cd8d]]
+2026-04-08T15:40:36.460+08:00  INFO 23580 --- [           main] o.s.m.s.b.SimpleBrokerMessageHandler     : Stopped.
+]]></system-out>
+  </testcase>
+</testsuite>
